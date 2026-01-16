@@ -1,0 +1,8 @@
+appsettings.json
+bin
+out
+deploy.sh
+monitor.sh
+setup-registry.sh
+verify.sh
+kompose
