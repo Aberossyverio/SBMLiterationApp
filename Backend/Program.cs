@@ -1,5 +1,7 @@
 using FastEndpoints;
+using FastEndpoints.Security;
 using FastEndpoints.Swagger;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PureTCOWebApp.Data;
@@ -16,6 +18,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services
     .AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Configure Identity to return status codes instead of redirecting
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+});
 
 // Add UnitOfWork
 builder.Services.AddScoped<UnitOfWork>();
@@ -35,6 +52,15 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+builder.Services
+    .AddAuthenticationJwtBearer(s => s.SigningKey = builder.Configuration["Jwt:SecretKey"])
+    .AddFastEndpoints()
+    .SwaggerDocument();
+
+builder.Services.AddAuthorization();
+
 var googleClientId = builder.Configuration["GoogleAuthCredentials:ClientId"];
 var googleClientSecret = builder.Configuration["GoogleAuthCredentials:ClientSecret"];
 if (string.IsNullOrEmpty(googleClientId) || string.IsNullOrEmpty(googleClientSecret))
@@ -43,20 +69,27 @@ if (string.IsNullOrEmpty(googleClientId) || string.IsNullOrEmpty(googleClientSec
 }
 
 builder.Services
-    .AddAuthentication()
+    .AddAuthentication(o =>
+    {
+        o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddGoogle(options =>
     {
         options.ClientId = googleClientId;
         options.ClientSecret = googleClientSecret;
     });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services
-    .AddFastEndpoints()
-    .SwaggerDocument();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -67,9 +100,15 @@ if (app.Environment.IsProduction())
     app.UseHttpsRedirection();
 }
 
-// Enable session middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors();
+}
+
 app.UseSession();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseFastEndpoints();
 
 if (app.Environment.IsDevelopment())
