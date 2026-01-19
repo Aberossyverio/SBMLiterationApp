@@ -15,6 +15,10 @@
   --color-green-800: #016538;
   --color-green-900: #0a5331;
   --color-green-950: #052e16;
+}
+
+.nuxt-icon svg {
+  margin-bottom: 0 !important;
 
   --color-base: #0b4c53;
 
