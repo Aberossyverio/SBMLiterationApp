@@ -21,7 +21,8 @@
     "@vueuse/core": "^14.1.0",
     "nuxt": "^4.2.2",
     "nuxt-icons": "4.0.0",
-    "pinia": "^3.0.4"
+    "pinia": "^3.0.4",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.12.1",

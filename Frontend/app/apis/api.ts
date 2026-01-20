@@ -1,7 +1,7 @@
 export function $authedFetch<T>(
   request: Parameters<typeof $fetch<T>>[0],
   opts?: Parameters<typeof $fetch<T>>[1]
-) {
+): ReturnType<typeof $fetch<T>> {
   const authStore = useAuth()
   const api = useNuxtApp().$backendApi
   let triedRefresh = false
@@ -17,7 +17,7 @@ export function $authedFetch<T>(
           reject(param)
 
         if (param.response.status >= 200 && param.response.status < 300)
-          resolve(param)
+          resolve(param.response._data)
       },
       async onResponseError({ response }) {
         if (triedRefresh && response.status === 401)
@@ -32,7 +32,7 @@ export function $authedFetch<T>(
               Authorization: `Bearer ${authStore.getToken()}`
             },
             onResponse(param) {
-              resolve(param)
+              resolve(param.response._data)
             },
             onResponseError(param) {
               reject(param)
