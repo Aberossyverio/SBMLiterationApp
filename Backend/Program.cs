@@ -49,6 +49,12 @@ builder.Services.AddHttpClient<PureTCOWebApp.Features.TestModule.GoogleBook.Goog
     client.BaseAddress = new Uri(builder.Configuration["GoogleBooks:BaseUrl"] ?? "https://www.googleapis.com/books/v1/");
 });
 
+// Add CrossRef Service
+builder.Services.AddHttpClient<PureTCOWebApp.Features.TestModule.JournalDoi.CrossRefService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["CrossRef:BaseUrl"] ?? "https://api.crossref.org/");
+});
+
 // Add session support for OAuth state management
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
