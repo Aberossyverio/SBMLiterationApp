@@ -43,6 +43,12 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 // Add HttpClient factory for OAuth
 builder.Services.AddHttpClient();
 
+// Add Google Books Service
+builder.Services.AddHttpClient<PureTCOWebApp.Features.TestModule.GoogleBook.GoogleBooksService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["GoogleBooks:BaseUrl"] ?? "https://www.googleapis.com/books/v1/");
+});
+
 // Add session support for OAuth state management
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
