@@ -24,6 +24,12 @@ public class SearchBooksEndpoint : Endpoint<SearchBooksRequest, PagingResult<Boo
 
     public override async Task HandleAsync(SearchBooksRequest req, CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(req.Query))
+        {
+            await Send.OkAsync(new PagingResult<BookItem>([], req.Page, req.RowsPerPage, 0, 0, ""), ct);
+            return;
+        }
+
         var startIndex = (req.Page - 1) * req.RowsPerPage;
         var result = await _googleBooksService.SearchBooksAsync(req.Query, req.RowsPerPage, startIndex);
         
