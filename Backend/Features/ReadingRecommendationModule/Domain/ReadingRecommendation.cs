@@ -1,13 +1,10 @@
 using PureTCOWebApp.Core.Models;
-using PureTCOWebApp.Features.ReadingResourceModule.Domain.Entities;
-using System.Text.Json.Serialization;
 
-namespace PureTCOWebApp.Features.ReadingResourceModule.Domain;
+namespace PureTCOWebApp.Features.ReadingRecommendationModule.Domain;
 
-public class ReadingResourceBase : AuditableEntity
+public class ReadingRecommendation : AuditableEntity
 {
     public int Id { get; protected set; }
-    public int UserId { get; protected set; }
     public string Title { get; protected set; }
     public string ISBN { get; protected set; }
     public string ReadingCategory { get; protected set; }
@@ -15,44 +12,30 @@ public class ReadingResourceBase : AuditableEntity
     public string PublishYear { get; protected set; }
     public int Page { get; protected set; }
     public string? ResourceLink { get; protected set; }
-    public string? CoverImageUri { get; protected set; }
-    public string CssClass { get; protected set; }
-
-    [JsonIgnore]
-    public virtual ICollection<ReadingReport> ReadingReports { get; set; } = [];
-
-    [JsonIgnore]
-    public virtual ICollection<StreakExp> StreakExps { get; set; } = [];
 
 #pragma warning disable CS8618
-    public ReadingResourceBase() { }
+    public ReadingRecommendation() { }
 #pragma warning restore CS8618
 
-    public static ReadingResourceBase Create(
-        int userId,
+    public static ReadingRecommendation Create(
         string title,
         string isbn,
         string readingCategory,
         string authors,
         string publishYear,
         int page,
-        string cssClass,
-        string? resourceLink = null,
-        string? coverImageUri = null
+        string? resourceLink = null
     )
     {
-        return new ReadingResourceBase
+        return new ReadingRecommendation
         {
-            UserId = userId,
             Title = title,
             ISBN = isbn,
             ReadingCategory = readingCategory,
             Authors = authors,
             PublishYear = publishYear,
             Page = page,
-            CssClass = cssClass,
-            ResourceLink = resourceLink,
-            CoverImageUri = coverImageUri
+            ResourceLink = resourceLink
         };
     }
 
@@ -63,9 +46,7 @@ public class ReadingResourceBase : AuditableEntity
         string authors,
         string publishYear,
         int page,
-        string cssClass,
-        string? resourceLink = null,
-        string? coverImageUri = null
+        string? resourceLink = null
     )
     {
         Title = title;
@@ -74,8 +55,6 @@ public class ReadingResourceBase : AuditableEntity
         Authors = authors;
         PublishYear = publishYear;
         Page = page;
-        CssClass = cssClass;
         ResourceLink = resourceLink;
-        CoverImageUri = coverImageUri;
     }
 }
