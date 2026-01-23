@@ -32,6 +32,6 @@ public class GetReadingResourceByIdEndpoint(ApplicationDbContext context)
             return;
         }
 
-        await Send.OkAsync(new ApiResponse<ReadingResourceBase>("Success", resource, null, null), ct);
+        await Send.OkAsync(Result.Success(resource), cancellation: ct);
     }
 }
