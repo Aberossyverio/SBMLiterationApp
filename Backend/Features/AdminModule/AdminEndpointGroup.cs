@@ -2,11 +2,11 @@ using FastEndpoints;
 
 namespace PureTCOWebApp.Features.AdminModule;
 
-public class AdminModuleEndpointGroup : Group
+public class AdminEndpointGroup : Group
 {
-    public AdminModuleEndpointGroup()
+    public AdminEndpointGroup()
     {
-        Configure("api/admin", ep =>
+        Configure("admins", ep =>
         {
             ep.Roles("Admin");
             ep.Description(x => x.WithTags("Admin Module"));

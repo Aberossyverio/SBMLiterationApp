@@ -12,7 +12,7 @@ public class AssignAdminRoleEndpoint(UserManager<User> userManager)
     public override void Configure()
     {
         Post("{UserId}/assign");
-        Group<AdminModuleEndpointGroup>();
+        Group<AdminEndpointGroup>();
     }
 
     public override async Task HandleAsync(AssignAdminRoleRequest req, CancellationToken ct)

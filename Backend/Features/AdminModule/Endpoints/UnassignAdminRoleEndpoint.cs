@@ -12,7 +12,7 @@ public class UnassignAdminRoleEndpoint(UserManager<User> userManager)
     public override void Configure()
     {
         Delete("{UserId}/unassign");
-        Group<AdminModuleEndpointGroup>();
+        Group<AdminEndpointGroup>();
     }
 
     public override async Task HandleAsync(UnassignAdminRoleRequest req, CancellationToken ct)

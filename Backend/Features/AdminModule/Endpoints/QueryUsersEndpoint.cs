@@ -28,7 +28,7 @@ public class QueryUsersEndpoint(UserManager<User> userManager)
     public override void Configure()
     {
         Get("users");
-        Group<AdminModuleEndpointGroup>();
+        Group<AdminEndpointGroup>();
     }
 
     public override async Task HandleAsync(QueryUsersRequest req, CancellationToken ct)
