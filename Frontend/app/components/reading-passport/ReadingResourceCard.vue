@@ -88,14 +88,19 @@ const items: DropdownMenuItem[][] = [
   >
     <template #header>
       <div class="flex items-start justify-between gap-2">
-        <UPageHeader
+        <!-- <UPageHeader
           :title="resource.title"
           :ui="{
             title: 'text-white max-h-[120px]   line-clamp-3 '
           }"
           class="flex-1 border-0 p-0"
-        />
+        /> -->
 
+        <div class="text-white max-h-[90px] text-[23px] font-bold  line-clamp-3 tracking-tight leading-tight">
+          <h1>{{ resource.title }}</h1>
+        </div>
+
+       <div class="flex-1">
         <UDropdownMenu :items>
           <UButton
             class="dark"
@@ -108,6 +113,7 @@ const items: DropdownMenuItem[][] = [
             icon="i-heroicons-ellipsis-vertical"
           />
         </UDropdownMenu>
+       </div>
       </div>
     </template>
 
