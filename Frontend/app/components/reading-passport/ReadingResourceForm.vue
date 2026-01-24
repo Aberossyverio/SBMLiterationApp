@@ -3,6 +3,8 @@ import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
 import { $authedFetch, handleResponseError } from '~/apis/api'
 import type { PagingResult } from '~/apis/paging'
+import GoogleBooksSearchModal from '~/components/recommendation/GoogleBooksSearchModal.vue'
+import type { GoogleBookVolume } from '~/components/recommendation/GoogleBooksSearchModal.vue'
 
 interface ReadingCategory {
   id: number
@@ -49,6 +51,7 @@ const categories = ref<ReadingCategory[]>([])
 const categoriesLoading = ref(false)
 const uploading = ref(false)
 const toast = useToast()
+const googleBooksModal = useTemplateRef<typeof GoogleBooksSearchModal>('googleBooksModal')
 
 const categoryOptions = computed(() => [
   ...categories.value.map(cat => ({
@@ -178,6 +181,43 @@ defineExpose({
   resetState
 })
 
+function openGoogleBooksSearch() {
+  googleBooksModal.value?.open()
+}
+
+function handleBookSelection(book: GoogleBookVolume) {
+  const isbn = book.volumeInfo.industryIdentifiers?.find(
+    id => id.type === 'ISBN_13' || id.type === 'ISBN_10'
+  )?.identifier || ''
+
+  state.title = book.volumeInfo.title || ''
+  state.isbn = isbn
+  state.authors = book.volumeInfo.authors && book.volumeInfo.authors.length > 0
+    ? book.volumeInfo.authors
+    : ['']
+  state.publishYear = book.volumeInfo.publishedDate?.substring(0, 4) || ''
+
+  // Handle category selection
+  const bookCategory = book.volumeInfo.categories?.[0] || ''
+  const categoryExists = categories.value.some(cat => cat.categoryName === bookCategory)
+  if (categoryExists && bookCategory) {
+    state.readingCategory = bookCategory
+    state.customCategory = ''
+  } else if (bookCategory) {
+    state.readingCategory = 'Other'
+    state.customCategory = bookCategory
+  }
+
+  state.page = book.volumeInfo.pageCount || 0
+  state.resourceLink = book.volumeInfo.previewLink || book.volumeInfo.infoLink || ''
+  state.coverImageUri = book.volumeInfo.imageLinks?.thumbnail || book.volumeInfo.imageLinks?.smallThumbnail || ''
+
+  toast.add({
+    title: 'Book details imported from Google Books',
+    color: 'success'
+  })
+}
+
 async function onSubmit(event: FormSubmitEvent<ReadingResourceSchema>) {
   emit('submit', {
     ...event.data,
@@ -204,6 +244,30 @@ async function onSubmit(event: FormSubmitEvent<ReadingResourceSchema>) {
       class="space-y-6"
       @submit="onSubmit"
     >
+      <!-- Google Books Search - only for books -->
+      <div
+        v-if="!journal"
+        class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-medium text-sm text-gray-900 dark:text-gray-100">
+              Import from Google Books
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Search and autofill book details from Google Books API
+            </p>
+          </div>
+          <UButton
+            type="button"
+            icon="i-heroicons-magnifying-glass"
+            @click="openGoogleBooksSearch"
+          >
+            Search Books
+          </UButton>
+        </div>
+      </div>
+
       <!-- Title field - full width -->
       <UFormField
         label="Title"
@@ -444,4 +508,9 @@ async function onSubmit(event: FormSubmitEvent<ReadingResourceSchema>) {
       </div>
     </UForm>
   </UCard>
+
+  <GoogleBooksSearchModal
+    ref="googleBooksModal"
+    @select="handleBookSelection"
+  />
 </template>

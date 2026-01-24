@@ -12,6 +12,7 @@ defineProps<{
     category: string
     xp: number
   }
+  googleBooks?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -72,6 +73,7 @@ async function addToReadList(book: { id: number }) {
         class="w-[178px] sm:w-[240px] aspect-[3/4] shrink-0 overflow-hidden rounded-[12px] relative"
       >
         <UBadge
+          v-if="!googleBooks"
           class="absolute right-3 top-3 tracking-tight font-semibold rounded-lg text-[12px] shadow-sm"
         >
           +{{ book.xp }}xp
@@ -100,7 +102,7 @@ async function addToReadList(book: { id: number }) {
         <div
           class="flex flex-row gap-x-2 items-center justify-between w-full mb-[10px]"
         >
-          <div class="flex flex-col tracking-tight">
+          <div class="flex flex-col tracking-tight justify-start items-start">
             <p
               class="text-[#363030] font-medium text-[10px] sm:text-[12px] leading-none"
             >
@@ -125,6 +127,7 @@ async function addToReadList(book: { id: number }) {
         </div>
         <div>
           <UButton
+            v-if="!googleBooks"
             class="w-full font-semibold rounded-full text-center bg-primary text-[13px] justify-center"
             :loading="loading"
             @click="addToReadList(book)"
