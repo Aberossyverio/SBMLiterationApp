@@ -12,11 +12,11 @@ definePageMeta({
 </script>
 
 <template>
-  <HomeHero/>
-    <!-- <HeaderHero /> -->
-    <HighlightHero />
+  <HomeHero />
+  <!-- <HeaderHero /> -->
+  <HighlightHero />
 
-    <AboutHero />
-    <ExploreHero />
-    <FaqHero />
+  <AboutHero />
+  <ExploreHero />
+  <FaqHero />
 </template>
