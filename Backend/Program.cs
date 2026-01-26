@@ -149,6 +149,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseCors();
 }
+else 
+{
+    app.UseCors(policy =>
+        policy.WithOrigins("https://staging.ryusu.id")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
