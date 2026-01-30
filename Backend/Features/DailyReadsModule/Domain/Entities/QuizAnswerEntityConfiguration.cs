@@ -9,11 +9,16 @@ public partial class QuizAnswerConfiguration : IEntityTypeConfiguration<QuizAnsw
     {
         builder.ToTable("mt_quiz_answer");
 
-        builder.HasKey(e => new { e.UserId, e.DailyReadId, e.QuestionSeq })
-            .HasName("pk_mt_quiz_answer");
+        builder.HasKey(e => e.Id).HasName("pk_mt_quiz_answer");
+
+        builder.HasIndex(e => new { e.UserId, e.DailyReadId, e.QuestionSeq })
+            .IsUnique()
+            .HasDatabaseName("ix_mt_quiz_answer_user_daily_question");
 
         builder.Ignore(e => e.CreateByStr);
         builder.Ignore(e => e.UpdateByStr);
+
+        builder.Property(e => e.Id).HasColumnName("id");
 
         builder.Property(e => e.UserId)
             .IsRequired()
@@ -31,6 +36,10 @@ public partial class QuizAnswerConfiguration : IEntityTypeConfiguration<QuizAnsw
             .IsRequired()
             .HasMaxLength(1)
             .HasColumnName("answer");
+
+        builder.Property(e => e.RetrySeq)
+            .HasDefaultValue(0)
+            .HasColumnName("retry_seq");
 
         builder.Property(e => e.Status)
             .HasDefaultValue(0)

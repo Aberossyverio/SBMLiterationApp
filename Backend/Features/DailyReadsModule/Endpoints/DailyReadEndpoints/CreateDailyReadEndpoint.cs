@@ -32,6 +32,9 @@ public class CreateDailyReadRequestValidator : AbstractValidator<CreateDailyRead
 
         RuleFor(x => x.Exp)
             .GreaterThanOrEqualTo(0).WithMessage("Exp must be greater than or equal to 0.");
+
+        RuleFor(x => x.MinimalCorrectAnswer)
+            .GreaterThanOrEqualTo(0).WithMessage("MinimalCorrectAnswer must be greater than or equal to 0.");
     }
 }
 
@@ -41,7 +44,8 @@ public record CreateDailyReadRequest(
     DateOnly Date,
     string? CoverImg = null,
     string? Category = null,
-    decimal Exp = 0
+    decimal Exp = 0,
+    int MinimalCorrectAnswer = 0
 );
 
 public record CreateDailyReadResponse(int Id, string Title, DateOnly Date);
@@ -66,7 +70,7 @@ public class CreateDailyReadEndpoint(
             return;
         }
 
-        var dailyRead = DailyRead.Create(req.Title, req.Content, req.Date, req.CoverImg, req.Category, req.Exp);
+        var dailyRead = DailyRead.Create(req.Title, req.Content, req.Date, req.CoverImg, req.Category, req.Exp, req.MinimalCorrectAnswer);
 
         await dbContext.AddAsync(dailyRead, ct);
         var result = await unitOfWork.SaveChangesAsync(ct);

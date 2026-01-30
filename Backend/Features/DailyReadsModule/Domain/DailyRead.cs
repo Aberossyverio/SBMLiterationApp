@@ -11,12 +11,13 @@ public class DailyRead : AuditableEntity
     public DateOnly Date { get; protected set; }
     public string? Category { get; protected set; }
     public decimal Exp { get; protected set; }
+    public int MinimalCorrectAnswer { get; protected set; }
 
 #pragma warning disable CS8618
     public DailyRead() { }
 #pragma warning restore CS8618
 
-    public static DailyRead Create(string title, string content, DateOnly date, string? coverImg = null, string? category = null, decimal exp = 0)
+    public static DailyRead Create(string title, string content, DateOnly date, string? coverImg = null, string? category = null, decimal exp = 0, int minimalCorrectAnswer = 0)
     {
         return new DailyRead
         {
@@ -25,11 +26,12 @@ public class DailyRead : AuditableEntity
             Date = date,
             CoverImg = coverImg,
             Category = category,
-            Exp = exp
+            Exp = exp,
+            MinimalCorrectAnswer = minimalCorrectAnswer
         };
     }
 
-    public void Update(string title, string content, DateOnly date, string? coverImg = null, string? category = null, decimal exp = 0)
+    public void Update(string title, string content, DateOnly date, string? coverImg = null, string? category = null, decimal exp = 0, int minimalCorrectAnswer = 0)
     {
         Title = title;
         Content = content;
@@ -37,5 +39,6 @@ public class DailyRead : AuditableEntity
         CoverImg = coverImg;
         Category = category;
         Exp = exp;
+        MinimalCorrectAnswer = minimalCorrectAnswer;
     }
 }

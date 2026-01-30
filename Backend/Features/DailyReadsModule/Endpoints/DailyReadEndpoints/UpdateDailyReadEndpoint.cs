@@ -31,6 +31,9 @@ public class UpdateDailyReadRequestValidator : AbstractValidator<UpdateDailyRead
 
         RuleFor(x => x.Exp)
             .GreaterThanOrEqualTo(0).WithMessage("Exp must be greater than or equal to 0.");
+
+        RuleFor(x => x.MinimalCorrectAnswer)
+            .GreaterThanOrEqualTo(0).WithMessage("MinimalCorrectAnswer must be greater than or equal to 0.");
     }
 }
 
@@ -40,7 +43,8 @@ public record UpdateDailyReadRequest(
     DateOnly Date,
     string? CoverImg = null,
     string? Category = null,
-    decimal Exp = 0
+    decimal Exp = 0,
+    int MinimalCorrectAnswer = 0
 );
 
 public class UpdateDailyReadEndpoint(
@@ -72,7 +76,7 @@ public class UpdateDailyReadEndpoint(
             return;
         }
 
-        dailyRead.Update(req.Title, req.Content, req.Date, req.CoverImg, req.Category, req.Exp);
+        dailyRead.Update(req.Title, req.Content, req.Date, req.CoverImg, req.Category, req.Exp, req.MinimalCorrectAnswer);
 
         var result = await unitOfWork.SaveChangesAsync(ct);
 

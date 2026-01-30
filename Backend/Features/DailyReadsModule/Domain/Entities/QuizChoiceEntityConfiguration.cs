@@ -13,12 +13,12 @@ public partial class QuizChoiceConfiguration : IEntityTypeConfiguration<QuizChoi
 
         builder.Property(e => e.Id).HasColumnName("id");
 
-        builder.Ignore(e => e.CreateByStr);
-        builder.Ignore(e => e.UpdateByStr);
-
-        builder.Property(e => e.QuizQuestionId)
+        builder.Property<int>("QuizQuestionId")
             .IsRequired()
             .HasColumnName("quiz_question_id");
+
+        builder.Ignore(e => e.CreateByStr);
+        builder.Ignore(e => e.UpdateByStr);
 
         builder.Property(e => e.Choice)
             .IsRequired()

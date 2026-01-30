@@ -54,8 +54,8 @@ public partial class QuizQuestionConfiguration : IEntityTypeConfiguration<QuizQu
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(e => e.Choices)
-            .WithOne(e => e.QuizQuestion)
-            .HasForeignKey(e => e.QuizQuestionId)
+            .WithOne()
+            .HasForeignKey("QuizQuestionId")
             .OnDelete(DeleteBehavior.Cascade);
 
         OnConfigurePartial(builder);

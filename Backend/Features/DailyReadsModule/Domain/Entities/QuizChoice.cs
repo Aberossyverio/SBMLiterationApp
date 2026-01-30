@@ -5,11 +5,8 @@ namespace PureTCOWebApp.Features.DailyReadsModule.Domain.Entities;
 public class QuizChoice : AuditableEntity
 {
     public int Id { get; protected set; }
-    public int QuizQuestionId { get; protected set; }
     public string Choice { get; protected set; }
     public string Answer { get; protected set; }
-
-    public QuizQuestion QuizQuestion { get; protected set; } = null!;
 
 #pragma warning disable CS8618
     public QuizChoice() { }

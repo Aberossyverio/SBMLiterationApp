@@ -55,24 +55,20 @@ public class SubmitQuizAnswerEndpoint(
             return;
         }
 
-        // Get existing answers for this user and daily read
         var existingAnswers = await dbContext.QuizAnswers
             .Where(a => a.UserId == userId && a.DailyReadId == dailyReadId)
-            .ToListAsync(ct);
+            .ToDictionaryAsync(a => a.QuestionSeq, ct);
 
         foreach (var answerDto in req.Answers)
         {
             var normalizedAnswer = answerDto.Answer.ToUpper().Trim();
-            var existing = existingAnswers.FirstOrDefault(a => a.QuestionSeq == answerDto.QuestionSeq);
 
-            if (existing != null)
+            if (existingAnswers.TryGetValue(answerDto.QuestionSeq, out var existing))
             {
-                // Update existing answer
                 existing.UpdateAnswer(normalizedAnswer);
             }
             else
             {
-                // Create new answer
                 var quizAnswer = QuizAnswer.Create(userId, dailyReadId, answerDto.QuestionSeq, normalizedAnswer);
                 await dbContext.AddAsync(quizAnswer, ct);
             }

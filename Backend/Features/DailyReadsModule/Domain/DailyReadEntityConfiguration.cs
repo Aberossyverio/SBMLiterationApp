@@ -42,6 +42,10 @@ public partial class DailyReadConfiguration : IEntityTypeConfiguration<DailyRead
             .HasDefaultValue(0)
             .HasColumnName("exp");
 
+        builder.Property(e => e.MinimalCorrectAnswer)
+            .HasDefaultValue(0)
+            .HasColumnName("minimal_correct_answer");
+
         builder.Property(e => e.Status)
             .HasDefaultValue(0)
             .HasColumnName("status");

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using PureTCOWebApp.Core.Models;
 
 namespace PureTCOWebApp.Features.DailyReadsModule.Domain.Entities;
@@ -9,9 +10,10 @@ public class QuizQuestion : AuditableEntity
     public int QuestionSeq { get; protected set; }
     public string Question { get; protected set; }
     public string CorrectAnswer { get; protected set; }
-
-    public DailyRead DailyRead { get; protected set; } = null!;
     public ICollection<QuizChoice> Choices { get; protected set; } = [];
+
+    [JsonIgnore]
+    public DailyRead DailyRead { get; protected set; } = null!;
 
 #pragma warning disable CS8618
     public QuizQuestion() { }
