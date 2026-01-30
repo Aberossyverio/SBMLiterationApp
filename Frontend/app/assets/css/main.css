@@ -25,6 +25,17 @@
   --font-poppins: "Poppins", sans-serif;
 }
 
+:root {
+  --ui-text: #3D3C39;
+  --ui-bg: #FAF9F5;
+}
+
+.dark {
+  --ui-bg: #262624;
+  --ui-text: #FAF9F5;
+  --ui-border: #41403D;
+}
+
 .swiper-pagination-bullets {
   display: none;
 }
