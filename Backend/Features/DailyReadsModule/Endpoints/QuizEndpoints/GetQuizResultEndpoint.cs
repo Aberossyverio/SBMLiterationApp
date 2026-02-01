@@ -16,7 +16,7 @@ public record QuizResultDto(
 public record GetQuizResultResponse(
     int TotalQuestions,
     int CorrectAnswers,
-    List<QuizResultDto> Results
+    int MinimalCorrectAnswers
 );
 
 public class GetQuizResultEndpoint(ApplicationDbContext dbContext)
@@ -34,9 +34,16 @@ public class GetQuizResultEndpoint(ApplicationDbContext dbContext)
         var userId = int.Parse(User.FindFirst("sub")!.Value);
 
         var questions = await dbContext.QuizQuestions
+            .AsNoTracking()
             .Where(q => q.DailyReadId == dailyReadId)
             .OrderBy(q => q.QuestionSeq)
             .ToListAsync(ct);
+
+        var minimumCorrect = await dbContext.DailyReads
+            .AsNoTracking()
+            .Where(dr => dr.Id == dailyReadId)
+            .Select(dr => dr.MinimalCorrectAnswer)
+            .FirstOrDefaultAsync(ct);
 
         if (!questions.Any())
         {
@@ -48,9 +55,10 @@ public class GetQuizResultEndpoint(ApplicationDbContext dbContext)
 
         var userAnswers = await dbContext.QuizAnswers
             .Where(a => a.UserId == userId && a.DailyReadId == dailyReadId)
+            .GroupBy(a => a.QuestionSeq)
+            .Select(g => g.OrderByDescending(a => a.RetrySeq).First())
             .ToListAsync(ct);
 
-        var results = new List<QuizResultDto>();
         var correctCount = 0;
 
         foreach (var question in questions)
@@ -61,13 +69,6 @@ public class GetQuizResultEndpoint(ApplicationDbContext dbContext)
 
             if (isCorrect)
                 correctCount++;
-
-            results.Add(new QuizResultDto(
-                question.QuestionSeq,
-                question.Question,
-                userAnswerText,
-                isCorrect
-            ));
         }
 
         var totalQuestions = questions.Count;
@@ -75,7 +76,7 @@ public class GetQuizResultEndpoint(ApplicationDbContext dbContext)
         var response = new GetQuizResultResponse(
             totalQuestions,
             correctCount,
-            results
+            minimumCorrect
         );
 
         await Send.OkAsync(Result.Success(response), cancellation: ct);
