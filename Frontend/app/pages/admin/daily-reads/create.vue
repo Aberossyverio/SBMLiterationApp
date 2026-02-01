@@ -28,12 +28,28 @@ async function onSubmit(param: {
 }) {
   try {
     formLoading.value = true
-    await $authedFetch('/daily-reads', {
+
+    // First, create the daily read
+    const response = await $authedFetch<{ data: { id: number } }>('/daily-reads', {
       method: 'POST',
       body: {
         ...param.data
       }
     })
+
+    const dailyReadId = response.data?.id
+
+    // Then, upload quiz if file is selected
+    const quizFile = form.value?.getQuizFile()
+    if (quizFile && dailyReadId) {
+      const formData = new FormData()
+      formData.append('file', quizFile)
+
+      await $authedFetch(`/daily-reads/${dailyReadId}/quiz/upload`, {
+        method: 'POST',
+        body: formData
+      })
+    }
 
     toast.add({
       title: 'Daily read created successfully',

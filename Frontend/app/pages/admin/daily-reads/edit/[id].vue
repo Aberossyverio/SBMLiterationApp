@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { $authedFetch, handleResponseError, type ApiResponse } from '~/apis/api'
 import DailyReadForm from '~/components/daily-reads/DailyReadForm.vue'
+import DailyReadQuizForm from '~/components/daily-reads/DailyReadQuizForm.vue'
 import DashboardNavbar from '~/components/layout/DashboardNavbar.vue'
 
 definePageMeta({
@@ -21,6 +22,7 @@ interface DailyRead {
 
 const route = useRoute()
 const router = useRouter()
+const quizForm = useTemplateRef<typeof DailyReadQuizForm>('quizForm')
 const form = useTemplateRef<typeof DailyReadForm>('form')
 const formLoading = ref(false)
 const pending = ref(false)
@@ -85,10 +87,30 @@ async function onSubmit(param: {
 }) {
   try {
     formLoading.value = true
+
+    // First, update the daily read
     await $authedFetch(`/daily-reads/${dailyReadId.value}`, {
       method: 'PUT',
       body: param.data
     })
+
+    // Then, upload quiz if file is selected
+    const quizFile = form.value?.getQuizFile()
+    if (quizFile) {
+      const formData = new FormData()
+      formData.append('file', quizFile)
+
+      await $authedFetch(`/daily-reads/${dailyReadId.value}/quiz/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      // Refresh the quiz display
+      quizForm.value?.refresh()
+
+      // Clear the quiz file from the form
+      form.value?.clearQuizFile()
+    }
 
     toast.add({
       title: 'Daily read updated successfully',
@@ -107,9 +129,8 @@ async function onSubmit(param: {
 <template>
   <UDashboardPanel>
     <template #header>
-      <DashboardNavbar title="Edit Daily Read" />
+      <DashboardNavbar />
     </template>
-
     <template #body>
       <div
         v-if="pending"
@@ -123,7 +144,7 @@ async function onSubmit(param: {
 
       <div
         v-else
-        class="max-w-2xl"
+        class="max-w-7xl mx-auto"
       >
         <div class="flex items-center gap-2 mb-6">
           <UButton
@@ -137,11 +158,24 @@ async function onSubmit(param: {
           </h1>
         </div>
 
-        <DailyReadForm
-          ref="form"
-          :loading="formLoading"
-          @submit="onSubmit"
-        />
+        <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6">
+          <div>
+            <DailyReadForm
+              ref="form"
+              :loading="formLoading"
+              @submit="onSubmit"
+            />
+          </div>
+
+          <div class="lg:sticky lg:top-6 lg:self-start">
+            <UCard>
+              <DailyReadQuizForm
+                ref="quizForm"
+                :daily-read-id="dailyReadData?.id ? Number(dailyReadData.id) : null"
+              />
+            </UCard>
+          </div>
+        </div>
       </div>
     </template>
   </UDashboardPanel>
