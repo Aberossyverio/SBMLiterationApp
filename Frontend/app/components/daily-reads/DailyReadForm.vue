@@ -51,6 +51,7 @@ const emit = defineEmits<{
 }>()
 
 const uploading = ref(false)
+const renderKey = ref(0)
 const toast = useToast()
 
 async function handleFileUpload(files: File[]) {
@@ -106,6 +107,8 @@ function setState(data: Partial<DailyReadFormState>) {
   if (data.category !== undefined) state.category = data.category
   if (data.exp !== undefined) state.exp = data.exp
   if (data.minimalCorrectAnswer !== undefined) state.minimalCorrectAnswer = data.minimalCorrectAnswer
+
+  renderKey.value++
 }
 
 function resetState() {
@@ -284,6 +287,7 @@ defineExpose({
     >
       <MarkdownEditor
         v-model="state.content"
+        :render-key="renderKey"
         placeholder="Write your daily read content here..."
       />
     </UFormField>

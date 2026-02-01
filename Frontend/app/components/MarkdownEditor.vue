@@ -6,6 +6,7 @@ import type { EditorView } from '@tiptap/pm/view'
 const props = defineProps<{
   modelValue: string
   placeholder?: string
+  renderKey?: number
 }>()
 
 const emit = defineEmits<{
@@ -19,6 +20,141 @@ const content = computed({
 
 const contentImageUploading = ref(false)
 const toast = useToast()
+const fileInput = ref<HTMLInputElement>()
+const editorView = ref<EditorView>()
+
+async function uploadImage(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    contentImageUploading.value = true
+    const response = await $authedFetch<{
+      message: string
+      data: {
+        url: string
+        fileName: string
+        fileSize: number
+        contentType: string
+      }
+      errorCode?: string
+      errorDescription?: string
+      errors?: string[]
+    }>('/files/upload', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (response.data?.url) {
+      return response.data.url
+    }
+    return null
+  } catch (error) {
+    handleResponseError(error)
+    return null
+  } finally {
+    contentImageUploading.value = false
+  }
+}
+
+async function handleFileInputChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const files = target.files
+  if (!files || files.length === 0) return
+
+  const file = files[0]
+  if (!file)
+    return
+  const imageUrl = await uploadImage(file)
+
+  if (imageUrl && editorView.value) {
+    const { schema } = editorView.value.state
+    const imageNode = schema.nodes.image?.create({ src: imageUrl })
+
+    if (imageNode) {
+      const transaction = editorView.value.state.tr.replaceSelectionWith(imageNode)
+      editorView.value.dispatch(transaction)
+
+      toast.add({
+        title: 'Image uploaded and inserted',
+        color: 'success'
+      })
+    }
+  }
+
+  // Reset input
+  target.value = ''
+}
+
+function handleContentImagePaste(view: EditorView, event: ClipboardEvent) {
+  const items = event.clipboardData?.items
+  if (!items) return false
+
+  for (const item of Array.from(items)) {
+    if (item.type.startsWith('image/')) {
+      event.preventDefault()
+
+      const file = item.getAsFile()
+      if (!file) continue
+
+      ;(async () => {
+        const imageUrl = await uploadImage(file)
+
+        if (imageUrl) {
+          const { schema } = view.state
+          const imageNode = schema.nodes.image?.create({ src: imageUrl })
+
+          if (imageNode) {
+            const transaction = view.state.tr.replaceSelectionWith(imageNode)
+            view.dispatch(transaction)
+
+            toast.add({
+              title: 'Image uploaded and inserted',
+              color: 'success'
+            })
+          }
+        }
+      })()
+
+      return true
+    }
+  }
+
+  return false
+}
+
+function handleDrop(view: EditorView, event: DragEvent) {
+  const files = event.dataTransfer?.files
+  if (!files || files.length === 0) return false
+
+  const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'))
+  if (imageFiles.length === 0) return false
+
+  event.preventDefault()
+
+  imageFiles.forEach((file) => {
+    ;(async () => {
+      const imageUrl = await uploadImage(file)
+
+      if (imageUrl) {
+        const { schema } = view.state
+        const imageNode = schema.nodes.image?.create({ src: imageUrl })
+
+        if (imageNode) {
+          const transaction = view.state.tr.replaceSelectionWith(imageNode)
+          view.dispatch(transaction)
+
+          toast.add({
+            title: 'Image uploaded and inserted',
+            color: 'success'
+          })
+        }
+      }
+    })()
+  })
+
+  return true
+}
 
 const toolbarItems: EditorToolbarItem[][] = [
   [
@@ -109,90 +245,36 @@ const toolbarItems: EditorToolbarItem[][] = [
       kind: 'link',
       icon: 'i-lucide-link',
       tooltip: { text: 'Link' }
-    },
-    {
-      kind: 'image',
-      icon: 'i-lucide-image',
-      tooltip: { text: 'Image' }
     }
   ]
 ]
-
-function handleContentImagePaste(view: EditorView, event: ClipboardEvent) {
-  const items = event.clipboardData?.items
-  if (!items) return false
-
-  for (const item of Array.from(items)) {
-    if (item.type.startsWith('image/')) {
-      event.preventDefault()
-
-      const file = item.getAsFile()
-      if (!file) continue
-
-      const formData = new FormData()
-      formData.append('file', file)
-
-      ;(async () => {
-        try {
-          contentImageUploading.value = true
-          const response = await $authedFetch<{
-            message: string
-            data: {
-              url: string
-              fileName: string
-              fileSize: number
-              contentType: string
-            }
-            errorCode?: string
-            errorDescription?: string
-            errors?: string[]
-          }>('/files/upload', {
-            method: 'POST',
-            body: formData
-          })
-
-          if (response.data?.url) {
-          // Insert the image at the current cursor position
-            const { schema } = view.state
-            const imageNode = schema.nodes.image?.create({ src: response.data.url })
-
-            if (!imageNode) return
-            const transaction = view.state.tr.replaceSelectionWith(imageNode)
-            view.dispatch(transaction)
-
-            toast.add({
-              title: 'Image uploaded and inserted',
-              color: 'success'
-            })
-          }
-        } catch (error) {
-          handleResponseError(error)
-        } finally {
-          contentImageUploading.value = false
-        }
-      })()
-
-      return true
-    }
-  }
-
-  return false
-}
 </script>
 
 <template>
   <div class="relative">
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      @change="handleFileInputChange"
+    >
+
     <UEditor
+      :key="renderKey"
       v-slot="{ editor }"
       v-model="content"
       :placeholder="placeholder || 'Start writing...'"
-      config="starter-kit"
+      :config="{
+        extensions: ['starter-kit', 'image']
+      }"
       class="w-full min-h-64 border border-gray-300 dark:border-gray-700 rounded-md"
       :ui="{
         content: 'py-4'
       }"
       :editor-props="{
-        handlePaste: handleContentImagePaste
+        handlePaste: handleContentImagePaste,
+        handleDrop: handleDrop
       }"
       editable
       content-type="markdown"
