@@ -9,6 +9,12 @@ const props = defineProps<{
   renderKey?: number
 }>()
 
+const localRenderKey = ref(0)
+
+const computedRenderKey = computed(() => {
+  return props.renderKey !== undefined ? props.renderKey + localRenderKey.value : localRenderKey.value
+})
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
@@ -90,6 +96,7 @@ function handleContentImagePaste(view: EditorView, event: ClipboardEvent) {
   const items = event.clipboardData?.items
   if (!items) return false
 
+  // Check for images first
   for (const item of Array.from(items)) {
     if (item.type.startsWith('image/')) {
       event.preventDefault()
@@ -118,6 +125,15 @@ function handleContentImagePaste(view: EditorView, event: ClipboardEvent) {
 
       return true
     }
+  }
+
+  // Check for text/markdown content
+  const textData = event.clipboardData?.getData('text/plain')
+  if (textData) {
+    // Increment render key to re-render the editor after paste
+    nextTick(() => {
+      localRenderKey.value++
+    })
   }
 
   return false
@@ -261,7 +277,7 @@ const toolbarItems: EditorToolbarItem[][] = [
     >
 
     <UEditor
-      :key="renderKey"
+      :key="computedRenderKey"
       v-slot="{ editor }"
       v-model="content"
       :placeholder="placeholder || 'Start writing...'"

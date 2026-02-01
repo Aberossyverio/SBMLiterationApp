@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { $authedFetch, handleResponseError } from '~/apis/api'
 import DailyReadForm from '~/components/daily-reads/DailyReadForm.vue'
+import DailyReadQuizForm from '~/components/daily-reads/DailyReadQuizForm.vue'
 import DashboardNavbar from '~/components/layout/DashboardNavbar.vue'
 
 definePageMeta({
@@ -9,9 +10,11 @@ definePageMeta({
 })
 
 const form = useTemplateRef<typeof DailyReadForm>('form')
+const quizForm = useTemplateRef<typeof DailyReadQuizForm>('quizForm')
 const formLoading = ref(false)
 const toast = useToast()
 const router = useRouter()
+const dailyReadId = ref<number | null>(null)
 
 async function onSubmit(param: {
   action: 'Create' | 'Update'
@@ -37,18 +40,20 @@ async function onSubmit(param: {
       }
     })
 
-    const dailyReadId = response.data?.id
+    dailyReadId.value = response.data?.id
 
     // Then, upload quiz if file is selected
-    const quizFile = form.value?.getQuizFile()
-    if (quizFile && dailyReadId) {
+    const quizFile = quizForm.value?.getQuizFile()
+    if (quizFile && dailyReadId.value) {
       const formData = new FormData()
       formData.append('file', quizFile)
 
-      await $authedFetch(`/daily-reads/${dailyReadId}/quiz/upload`, {
+      await $authedFetch(`/daily-reads/${dailyReadId.value}/quiz/upload`, {
         method: 'POST',
         body: formData
       })
+
+      quizForm.value?.refresh()
     }
 
     toast.add({
@@ -72,7 +77,7 @@ async function onSubmit(param: {
     </template>
 
     <template #body>
-      <div class="max-w-2xl">
+      <div class="max-w-7xl mx-auto">
         <div class="flex items-center gap-2 mb-6">
           <UButton
             icon="i-lucide-arrow-left"
@@ -85,11 +90,24 @@ async function onSubmit(param: {
           </h1>
         </div>
 
-        <DailyReadForm
-          ref="form"
-          :loading="formLoading"
-          @submit="onSubmit"
-        />
+        <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6 pr-6">
+          <div>
+            <DailyReadForm
+              ref="form"
+              :loading="formLoading"
+              @submit="onSubmit"
+            />
+          </div>
+
+          <div class="lg:sticky lg:top-6 lg:self-start">
+            <UCard>
+              <DailyReadQuizForm
+                ref="quizForm"
+                :daily-read-id="dailyReadId"
+              />
+            </UCard>
+          </div>
+        </div>
       </div>
     </template>
   </UDashboardPanel>

@@ -53,17 +53,6 @@ const emit = defineEmits<{
 const uploading = ref(false)
 const renderKey = ref(0)
 const toast = useToast()
-const quizFile = ref<File | null>(null)
-
-async function handleQuizFileUpload(files: File[]) {
-  if (!files || !files[0] || files.length === 0) return
-  quizFile.value = files[0]
-  toast.add({
-    title: 'Quiz file selected',
-    description: `${files[0].name} ready to upload`,
-    color: 'success'
-  })
-}
 
 async function handleFileUpload(files: File[]) {
   if (!files || !files[0] || files.length === 0) return
@@ -107,8 +96,6 @@ async function handleFileUpload(files: File[]) {
 function update(data: DailyReadFormState) {
   setState(data)
   action.value = 'Update'
-  // Clear quiz file when updating
-  quizFile.value = null
 }
 
 function setState(data: Partial<DailyReadFormState>) {
@@ -133,15 +120,6 @@ function resetState() {
   state.category = ''
   state.exp = 0
   state.minimalCorrectAnswer = 0
-  quizFile.value = null
-}
-
-function getQuizFile() {
-  return quizFile.value
-}
-
-function clearQuizFile() {
-  quizFile.value = null
 }
 
 function onSubmit(event: { data: Schema }) {
@@ -164,9 +142,7 @@ function onSubmit(event: { data: Schema }) {
 defineExpose({
   update,
   setState,
-  resetState,
-  getQuizFile,
-  clearQuizFile
+  resetState
 })
 </script>
 
@@ -314,31 +290,6 @@ defineExpose({
         :render-key="renderKey"
         placeholder="Write your daily read content here..."
       />
-    </UFormField>
-
-    <UFormField
-      label="Quiz Questions"
-      name="quiz"
-      class="col-span-full"
-    >
-      <div class="space-y-3">
-        <UInput
-          type="file"
-          accept=".xlsx,.xls"
-          @change="(e) => handleQuizFileUpload(Array.from((e.target as HTMLInputElement).files || []))"
-        />
-
-        <div
-          v-if="quizFile"
-          class="text-sm text-gray-600 dark:text-gray-400"
-        >
-          Selected file: <span class="font-medium">{{ quizFile.name }}</span>
-        </div>
-
-        <p class="text-xs text-gray-500">
-          Upload your quiz questions file. The quiz will be uploaded after saving the daily read.
-        </p>
-      </div>
     </UFormField>
 
     <div class="flex justify-end gap-2 pt-4">

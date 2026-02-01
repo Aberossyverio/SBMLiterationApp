@@ -19,7 +19,7 @@ const recommendation = useTemplateRef<typeof ReadingRecomendationList>('recommen
 const auth = useAuth()
 const useAuthedFetch = useNuxtApp().$useAuthedFetch
 
-const { data: readingReports, pending: reportPending, error } = await useAuthedFetch<PagingResult<ReadingReportData>>('/reading-resources/reports', {
+const { data: readingReports, pending: reportPending, error } = await useAuthedFetch<PagingResult<ReadingReportData>>('/reading-resources/reports/latest-activity', {
   query: {
     page: 1,
     pageSize: 5

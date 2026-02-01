@@ -22,6 +22,25 @@ const props = defineProps<{
 const quiz = ref<QuizQuestion[] | null>(null)
 const pending = ref(false)
 const toast = useToast()
+const quizFile = ref<File | null>(null)
+
+async function handleQuizFileUpload(files: File[]) {
+  if (!files || !files[0] || files.length === 0) return
+  quizFile.value = files[0]
+  toast.add({
+    title: 'Quiz file selected',
+    description: `${files[0].name} ready to upload`,
+    color: 'success'
+  })
+}
+
+function getQuizFile() {
+  return quizFile.value
+}
+
+function clearQuizFile() {
+  quizFile.value = null
+}
 
 async function downloadQuizTemplate() {
   try {
@@ -78,7 +97,9 @@ watch(() => props.dailyReadId, () => {
 }, { immediate: true })
 
 defineExpose({
-  refresh: fetchQuiz
+  refresh: fetchQuiz,
+  getQuizFile,
+  clearQuizFile
 })
 </script>
 
@@ -102,6 +123,25 @@ defineExpose({
       <p class="text-sm text-gray-500">
         {{ dailyReadId ? 'Current quiz for this daily read' : 'Save daily read first to add quiz' }}
       </p>
+
+      <div class="mt-4 space-y-3">
+        <UInput
+          type="file"
+          accept=".xlsx,.xls"
+          @change="(e) => handleQuizFileUpload(Array.from((e.target as HTMLInputElement).files || []))"
+        />
+
+        <div
+          v-if="quizFile"
+          class="text-sm text-gray-600 dark:text-gray-400"
+        >
+          Selected file: <span class="font-medium">{{ quizFile.name }}</span>
+        </div>
+
+        <p class="text-xs text-gray-500">
+          Upload your quiz questions file. The quiz will be uploaded after saving the daily read.
+        </p>
+      </div>
     </div>
 
     <div

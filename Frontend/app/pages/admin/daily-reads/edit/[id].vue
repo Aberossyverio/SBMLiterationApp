@@ -158,7 +158,7 @@ async function onSubmit(param: {
           </h1>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6 pr-6">
           <div>
             <DailyReadForm
               ref="form"
