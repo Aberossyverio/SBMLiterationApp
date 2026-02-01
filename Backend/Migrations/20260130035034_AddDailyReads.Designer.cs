@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PureTCOWebApp.Data;
@@ -11,9 +12,11 @@ using PureTCOWebApp.Data;
 namespace PureTCOWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260130035034_AddDailyReads")]
+    partial class AddDailyReads
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -346,12 +349,6 @@ namespace PureTCOWebApp.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("exp");
 
-                    b.Property<int>("MinimalCorrectAnswer")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("minimal_correct_answer");
-
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -380,12 +377,17 @@ namespace PureTCOWebApp.Migrations
 
             modelBuilder.Entity("PureTCOWebApp.Features.DailyReadsModule.Domain.Entities.QuizAnswer", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("integer")
-                        .HasColumnName("id");
+                        .HasColumnName("user_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int>("DailyReadId")
+                        .HasColumnType("integer")
+                        .HasColumnName("daily_read_id");
+
+                    b.Property<int>("QuestionSeq")
+                        .HasColumnType("integer")
+                        .HasColumnName("question_seq");
 
                     b.Property<string>("Answer")
                         .IsRequired()
@@ -403,20 +405,6 @@ namespace PureTCOWebApp.Migrations
                         .HasColumnName("create_time")
                         .HasDefaultValueSql("(now())");
 
-                    b.Property<int>("DailyReadId")
-                        .HasColumnType("integer")
-                        .HasColumnName("daily_read_id");
-
-                    b.Property<int>("QuestionSeq")
-                        .HasColumnType("integer")
-                        .HasColumnName("question_seq");
-
-                    b.Property<int>("RetrySeq")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("retry_seq");
-
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -431,15 +419,8 @@ namespace PureTCOWebApp.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("update_time");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
+                    b.HasKey("UserId", "DailyReadId", "QuestionSeq")
                         .HasName("pk_mt_quiz_answer");
-
-                    b.HasIndex("UserId", "DailyReadId", "QuestionSeq")
-                        .HasDatabaseName("ix_mt_quiz_answer_user_daily_question");
 
                     b.ToTable("mt_quiz_answer", (string)null);
                 });
@@ -1108,11 +1089,13 @@ namespace PureTCOWebApp.Migrations
 
             modelBuilder.Entity("PureTCOWebApp.Features.DailyReadsModule.Domain.Entities.QuizChoice", b =>
                 {
-                    b.HasOne("PureTCOWebApp.Features.DailyReadsModule.Domain.Entities.QuizQuestion", null)
+                    b.HasOne("PureTCOWebApp.Features.DailyReadsModule.Domain.Entities.QuizQuestion", "QuizQuestion")
                         .WithMany("Choices")
                         .HasForeignKey("QuizQuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("QuizQuestion");
                 });
 
             modelBuilder.Entity("PureTCOWebApp.Features.DailyReadsModule.Domain.Entities.QuizQuestion", b =>
