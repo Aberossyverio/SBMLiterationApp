@@ -20,11 +20,16 @@ interface QuizQuestion {
 }
 
 interface QuizSubmission {
-  dailyReadId: string
   answers: {
-    questionId: number
+    questionSeq: number
     answer: string
   }[]
+}
+
+interface QuizResult {
+  totalQuestions: number
+  minimalCorrectAnswers: number
+  correctAnswers: number
 }
 
 const route = useRoute()
@@ -36,16 +41,25 @@ const slug = computed(() => route.params.slug as string)
 const quiz = ref<QuizQuestion[]>([])
 const currentQuestionIndex = ref(0)
 const selectedAnswer = ref<string>('')
-const userAnswers = ref<{ questionId: number, answer: string }[]>([])
+const userAnswers = ref<{ questionSeq: number, answer: string }[]>([])
 const pending = ref(false)
 const submitting = ref(false)
 const quizCompleted = ref(false)
-const score = ref(0)
-const earnedExp = ref(0)
+const quizResult = ref<QuizResult | null>(null)
+const passed = ref(false)
 
 const currentQuestion = computed(() => quiz.value[currentQuestionIndex.value])
 const isLastQuestion = computed(() => currentQuestionIndex.value === quiz.value.length - 1)
 const progress = computed(() => ((currentQuestionIndex.value + 1) / quiz.value.length) * 100)
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!]
+  }
+  return shuffled
+}
 
 onMounted(async () => {
   try {
@@ -55,7 +69,12 @@ onMounted(async () => {
     )
 
     if (response.data && Array.isArray(response.data)) {
-      quiz.value = response.data.sort((a, b) => a.questionSeq - b.questionSeq)
+      // Shuffle questions and their choices
+      const shuffledQuestions = shuffleArray(response.data).map(question => ({
+        ...question,
+        choices: shuffleArray(question.choices)
+      }))
+      quiz.value = shuffledQuestions
     } else {
       handleResponseError(response)
       router.push('/dashboard')
@@ -85,7 +104,7 @@ async function nextQuestion() {
 
   // Store the answer
   userAnswers.value.push({
-    questionId: currentQuestion.value.id,
+    questionSeq: currentQuestion.value.questionSeq,
     answer: selectedAnswer.value
   })
 
@@ -102,35 +121,36 @@ async function submitQuiz() {
     submitting.value = true
 
     const submission: QuizSubmission = {
-      dailyReadId: slug.value,
       answers: userAnswers.value
     }
 
-    const response = await $authedFetch<ApiResponse<{
-      score: number
-      totalQuestions: number
-      earnedExp: number
-      passed: boolean
-    }>>('/daily-reads/quiz/submit', {
+    await $authedFetch(`/daily-reads/${slug.value}/quiz/submit`, {
       method: 'POST',
       body: submission
     })
 
+    // Fetch the quiz result
+    pending.value = true
+    const response = await $authedFetch<ApiResponse<QuizResult>>(
+      `/daily-reads/${slug.value}/quiz/result`
+    )
+
     if (response.data) {
-      score.value = response.data.score
-      earnedExp.value = response.data.earnedExp
+      quizResult.value = response.data
       quizCompleted.value = true
 
-      if (response.data.passed) {
+      passed.value = response.data.correctAnswers >= response.data.minimalCorrectAnswers
+
+      if (passed.value) {
         toast.add({
           title: 'Congratulations! 🎉',
-          description: `You passed the quiz! Earned ${response.data.earnedExp} EXP`,
+          description: `You passed the quiz! Score: ${response.data.correctAnswers}/${response.data.totalQuestions}`,
           color: 'success'
         })
       } else {
         toast.add({
           title: 'Quiz Completed',
-          description: `You scored ${response.data.score}/${response.data.totalQuestions}. Keep practicing!`,
+          description: `You scored ${response.data.correctAnswers}/${response.data.totalQuestions}. Keep practicing!`,
           color: 'warning'
         })
       }
@@ -141,6 +161,7 @@ async function submitQuiz() {
     handleResponseError(err)
   } finally {
     submitting.value = false
+    pending.value = false
   }
 }
 
@@ -163,16 +184,20 @@ function backToDashboard() {
 
     <!-- Quiz Completed -->
     <div
-      v-else-if="quizCompleted"
+      v-else-if="quizCompleted && quizResult"
       class="space-y-6"
     >
       <UCard>
         <div class="text-center space-y-6 py-8">
           <div class="flex justify-center">
-            <div class="w-32 h-32 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+            <div
+              class="w-32 h-32 rounded-full flex items-center justify-center"
+              :class="passed ? 'bg-primary-100 dark:bg-primary-900' : 'bg-red-100 dark:bg-red-900'"
+            >
               <UIcon
-                :name="score >= quiz.length * 0.7 ? 'i-heroicons-trophy' : 'i-heroicons-check-badge'"
-                class="size-16 text-primary-600"
+                :name="passed ? 'i-heroicons-trophy' : 'i-heroicons-x-circle'"
+                class="size-16"
+                :class="passed ? 'text-primary-600' : 'text-red-600'"
               />
             </div>
           </div>
@@ -182,19 +207,8 @@ function backToDashboard() {
               Quiz Completed!
             </h1>
             <p class="text-xl text-gray-600">
-              Your Score: {{ score }} / {{ quiz.length }}
+              Your Score: {{ quizResult.correctAnswers }} / {{ quizResult.totalQuestions }}
             </p>
-          </div>
-
-          <div
-            v-if="earnedExp > 0"
-            class="flex items-center justify-center gap-2 text-lg"
-          >
-            <UIcon
-              name="i-lucide-star"
-              class="size-6 text-yellow-500"
-            />
-            <span class="font-semibold">+{{ earnedExp }} EXP</span>
           </div>
 
           <div class="flex justify-center gap-4 pt-4">
@@ -242,7 +256,7 @@ function backToDashboard() {
           <div>
             <div class="flex items-start gap-3 mb-4">
               <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center font-bold text-primary-600">
-                {{ currentQuestion.questionSeq }}
+                {{ currentQuestionIndex + 1 }}
               </div>
               <h2 class="text-2xl font-semibold pt-1">
                 {{ currentQuestion.question }}
@@ -281,9 +295,6 @@ function backToDashboard() {
                     />
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="font-medium text-gray-700 dark:text-gray-300">
-                      {{ choice.choice }}.
-                    </span>
                     <span class="text-gray-900 dark:text-gray-100">
                       {{ choice.answer }}
                     </span>

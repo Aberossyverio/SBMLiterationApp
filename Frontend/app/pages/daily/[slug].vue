@@ -114,17 +114,19 @@ function startQuiz() {
         </div>
       </div>
 
+      <USeparator />
+
       <!-- Content -->
-      <UCard>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <UEditor
-          class="prose prose-lg dark:prose-invert max-w-none"
-          :model-value="dailyRead.content"
-          content-type="markdown"
-          readonly
-          :editable="false"
-        />
-      </UCard>
+      <UEditor
+        :model-value="dailyRead.content"
+        content-type="markdown"
+        readonly
+        :editable="false"
+        class="custom-prose"
+        :ui="{
+          content: 'p-0'
+        }"
+      />
 
       <!-- Quiz Button -->
       <div class="flex justify-center pt-6">
@@ -152,3 +154,9 @@ function startQuiz() {
     </div>
   </UContainer>
 </template>
+
+<style scoped>
+.custom-prose :deep(.ProseMirror) {
+    padding: 0
+}
+</style>
