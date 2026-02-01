@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { $authedFetch, handleResponseError } from '~/apis/api'
 import type { PagingResult } from '~/apis/paging'
 
 interface ReadingCategory {
@@ -28,10 +27,19 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 
-const categories = ref<ReadingCategory[]>([])
-const categoriesLoading = ref(false)
 const selectedCategory = ref('')
 const customCategory = ref('')
+
+// SSR-friendly data fetching
+const { $useAuthedFetch } = useNuxtApp()
+const { data: categoriesData, pending: categoriesLoading } = await $useAuthedFetch<PagingResult<ReadingCategory>>('/reading-categories', {
+  query: {
+    page: 1,
+    pageSize: 100
+  }
+})
+
+const categories = computed(() => categoriesData.value?.rows || [])
 
 const categoryOptions = computed(() => [
   ...categories.value.map(cat => ({
@@ -43,24 +51,35 @@ const categoryOptions = computed(() => [
 
 const isCustomCategory = computed(() => selectedCategory.value === 'Other')
 
-// Sync internal state with external modelValue
-watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
+function syncCategoryFromValue(value: string) {
+  if (!value) {
     selectedCategory.value = ''
     customCategory.value = ''
     return
   }
 
   // Check if the value exists in categories
-  const categoryExists = categories.value.some(cat => cat.categoryName === newValue)
+  const categoryExists = categories.value.some(cat => cat.categoryName === value)
   if (categoryExists) {
-    selectedCategory.value = newValue
+    selectedCategory.value = value
     customCategory.value = ''
   } else {
     selectedCategory.value = 'Other'
-    customCategory.value = newValue
+    customCategory.value = value
+  }
+}
+
+// Watch for categories data and sync when loaded
+watch(categories, () => {
+  if (categories.value.length > 0) {
+    syncCategoryFromValue(props.modelValue)
   }
 }, { immediate: true })
+
+// Sync internal state with external modelValue
+watch(() => props.modelValue, (newValue) => {
+  syncCategoryFromValue(newValue)
+})
 
 // Emit the actual category value (not "Other", but the custom value if applicable)
 watch([selectedCategory, customCategory], () => {
@@ -69,29 +88,6 @@ watch([selectedCategory, customCategory], () => {
     emit('update:modelValue', actualValue)
   }
 }, { flush: 'post' })
-
-async function fetchCategories() {
-  try {
-    categoriesLoading.value = true
-    const response = await $authedFetch<PagingResult<ReadingCategory>>('/reading-categories', {
-      query: {
-        page: 1,
-        pageSize: 100
-      }
-    })
-    if (response.rows) {
-      categories.value = response.rows
-    }
-  } catch (err) {
-    handleResponseError(err)
-  } finally {
-    categoriesLoading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchCategories()
-})
 </script>
 
 <template>
