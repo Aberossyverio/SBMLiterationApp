@@ -37,7 +37,7 @@ public class StreakLogFromQuizAnswerEventHandler : IDomainEventHandler<QuizAnswe
         
         if (correctCount < dailyRead.MinimalCorrectAnswer) return;
         
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.ToLocalTime());
         
         var existsToday = await _dbContext.StreakLogs
             .AnyAsync(s => s.UserId == domainEvent.UserId && s.StreakDate == today, cancellationToken);

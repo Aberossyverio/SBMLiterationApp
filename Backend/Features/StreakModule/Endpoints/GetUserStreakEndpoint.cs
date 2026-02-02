@@ -28,7 +28,7 @@ public class GetUserStreakEndpoint(ApplicationDbContext context, UserExpDomainSe
     public override async Task HandleAsync(CancellationToken ct)
     {
         var userId = int.Parse(User.FindFirst("sub")!.Value);
-        var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(8));
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.ToLocalTime());
 
         // Get weekly status (Monday to Sunday)
         var daysSinceMonday = ((int)today.DayOfWeek - 1 + 7) % 7;

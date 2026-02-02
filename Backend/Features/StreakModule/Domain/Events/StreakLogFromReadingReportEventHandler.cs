@@ -17,7 +17,7 @@ public class StreakLogFromReadingReportEventHandler : IDomainEventHandler<Readin
     public async Task Handle(ReadingReportCreatedEvent domainEvent, CancellationToken cancellationToken)
     {
         var report = domainEvent.Report;
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.ToLocalTime());
         
         var existsToday = await _dbContext.StreakLogs
             .AnyAsync(s => s.UserId == report.UserId && s.StreakDate == today, cancellationToken);
