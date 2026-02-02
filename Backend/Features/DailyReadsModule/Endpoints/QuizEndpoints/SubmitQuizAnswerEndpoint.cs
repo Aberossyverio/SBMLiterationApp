@@ -55,23 +55,19 @@ public class SubmitQuizAnswerEndpoint(
             return;
         }
 
-        var existingAnswers = await dbContext.QuizAnswers
+        var maxRetrySeqs = await dbContext.QuizAnswers
             .Where(a => a.UserId == userId && a.DailyReadId == dailyReadId)
-            .ToDictionaryAsync(a => a.QuestionSeq, ct);
+            .GroupBy(a => a.QuestionSeq)
+            .Select(g => new { QuestionSeq = g.Key, MaxRetrySeq = g.Max(a => a.RetrySeq) })
+            .ToDictionaryAsync(x => x.QuestionSeq, x => x.MaxRetrySeq, ct);
 
         foreach (var answerDto in req.Answers)
         {
             var normalizedAnswer = answerDto.Answer.ToUpper().Trim();
-
-            if (existingAnswers.TryGetValue(answerDto.QuestionSeq, out var existing))
-            {
-                existing.UpdateAnswer(normalizedAnswer);
-            }
-            else
-            {
-                var quizAnswer = QuizAnswer.Create(userId, dailyReadId, answerDto.QuestionSeq, normalizedAnswer);
-                await dbContext.AddAsync(quizAnswer, ct);
-            }
+            var nextRetrySeq = maxRetrySeqs.GetValueOrDefault(answerDto.QuestionSeq, -1) + 1;
+            
+            var quizAnswer = QuizAnswer.Create(userId, dailyReadId, answerDto.QuestionSeq, normalizedAnswer, nextRetrySeq);
+            await dbContext.AddAsync(quizAnswer, ct);
         }
 
         var result = await unitOfWork.SaveChangesAsync(ct);
