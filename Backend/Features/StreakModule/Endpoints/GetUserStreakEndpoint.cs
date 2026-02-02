@@ -12,7 +12,7 @@ public record DayStreakStatus(
 
 public record GetUserStreakResponse(
     int CurrentStreakDays,
-    int TotalPoints,
+    decimal TotalExp,
     List<DayStreakStatus> WeeklyStatus);
 
 public class GetUserStreakEndpoint(ApplicationDbContext context)
@@ -29,10 +29,9 @@ public class GetUserStreakEndpoint(ApplicationDbContext context)
         var userId = int.Parse(User.FindFirst("sub")!.Value);
         var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(8));
 
-        // Get streak logs for current week (Monday to Sunday)
         var daysSinceMonday = ((int)today.DayOfWeek - 1 + 7) % 7;
-        var startOfWeek = today.AddDays(-daysSinceMonday); // Monday
-        var endOfWeek = startOfWeek.AddDays(6); // Sunday
+        var startOfWeek = today.AddDays(-daysSinceMonday);
+        var endOfWeek = startOfWeek.AddDays(6);
 
         var streakLogs = await context.StreakLogs
             .Where(s => s.UserId == userId && 
@@ -41,7 +40,6 @@ public class GetUserStreakEndpoint(ApplicationDbContext context)
             .Select(s => s.StreakDate)
             .ToListAsync(ct);
 
-        // Build weekly status (Monday to Sunday)
         var weeklyStatus = new List<DayStreakStatus>();
         
         for (int i = 0; i < 7; i++)
@@ -51,7 +49,6 @@ public class GetUserStreakEndpoint(ApplicationDbContext context)
             weeklyStatus.Add(new DayStreakStatus(date.ToString("yyyy-MM-dd"), hasStreak));
         }
 
-        // Calculate current streak
         var allStreakLogs = await context.StreakLogs
             .Where(s => s.UserId == userId && s.StreakDate <= today)
             .OrderByDescending(s => s.StreakDate)
@@ -63,7 +60,6 @@ public class GetUserStreakEndpoint(ApplicationDbContext context)
         {
             var lastStreakDate = allStreakLogs.First();
             
-            // Streak is valid only if last streak is today or yesterday
             if (lastStreakDate == today || lastStreakDate == today.AddDays(-1))
             {
                 currentStreak = 1;
@@ -84,14 +80,15 @@ public class GetUserStreakEndpoint(ApplicationDbContext context)
             }
         }
 
-        // Calculate total points
-        var totalPoints = await context.StreakExps
+        var totalExp = await context.UserExpSnapshots
             .Where(s => s.UserId == userId)
-            .SumAsync(s => s.Exp, ct);
+            .OrderByDescending(s => s.SnapshotSeq)
+            .Select(s => s.Exp)
+            .FirstOrDefaultAsync(ct);
 
         var response = new GetUserStreakResponse(
             CurrentStreakDays: currentStreak,
-            TotalPoints: totalPoints,
+            TotalExp: totalExp,
             WeeklyStatus: weeklyStatus);
 
         await Send.OkAsync(Result.Success(response), ct);
