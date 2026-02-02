@@ -131,6 +131,7 @@ function startQuiz() {
       <!-- Quiz Button -->
       <div class="flex justify-center pt-6">
         <UButton
+          v-if="dailyRead.date === new Date().toISOString().split('T')[0]"
           size="xl"
           icon="i-lucide-brain"
           @click="startQuiz"
