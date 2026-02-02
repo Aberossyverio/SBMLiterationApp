@@ -16,7 +16,7 @@ onMounted(async () => {
   try {
     pending.value = true
     const response = await $authedFetch<ApiResponse<DailyRead>>(
-      `/daily-reads/${slug.value}`
+      `/daily-reads/${slug.value}/participant`
     )
 
     if (response.data) {

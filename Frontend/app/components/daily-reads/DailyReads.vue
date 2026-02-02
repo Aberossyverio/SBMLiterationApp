@@ -24,7 +24,7 @@ const useAuthedFetch = useNuxtApp().$useAuthedFetch
 
 const pending = ref(true)
 
-const { data, error } = await useAuthedFetch<PagingResult<DailyRead>>('/daily-reads', {
+const { data, error } = await useAuthedFetch<PagingResult<DailyRead>>('/daily-reads/participant', {
   query: {
     page: 1,
     pageSize: 100
