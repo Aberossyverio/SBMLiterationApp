@@ -34,7 +34,7 @@ const route = useRoute()
           :variant="route.name === 'leaderboard' ? 'solid' : 'soft'"
         >
           <nuxt-icon
-            name="reading"
+            name="trophy"
             class="text-[34px] mb-0"
           />
         </UButton>
