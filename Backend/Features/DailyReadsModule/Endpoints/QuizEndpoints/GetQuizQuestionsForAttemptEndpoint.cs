@@ -33,6 +33,14 @@ public class GetQuizQuestionsForAttemptEndpoint(ApplicationDbContext dbContext)
             return;
         }
 
+        if (dailyRead.Date != DateOnly.FromDateTime(DateTime.UtcNow.ToLocalTime()))
+        {
+            await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>(
+                Result.Failure(new Error("Quiz.NotAvailable", "Quiz is not available for this daily read"))
+            ));
+            return;
+        }
+
         var latestAnswers = await dbContext.QuizAnswers
             .Where(a => a.UserId == userId && a.DailyReadId == dailyReadId)
             .GroupBy(a => a.QuestionSeq)
