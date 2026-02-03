@@ -71,7 +71,7 @@ public class UserExpDomainService(ApplicationDbContext _context)
             item => new UserExp
             {
                 Exp = item.Exp,
-                User = item.User,
+                Username = item.User.Fullname,
                 Rank = 0 // Will be set after pagination
             },
             ct);
@@ -99,7 +99,7 @@ public class UserExpDomainService(ApplicationDbContext _context)
     {
         public int Rank { get; set; }
         public decimal Exp { get; set; }
-        public User User { get; set; } = null!;
+        public string Username { get; set; } = null!;
     }
     
     private class IntResult

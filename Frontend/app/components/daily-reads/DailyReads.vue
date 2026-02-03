@@ -116,7 +116,7 @@ onMounted(async () => {
           <p class="text-sm text-gray-500 font-medium">
             Daily Reading for
           </p>
-          <p class="text-lg font-semibold text-gray-900">
+          <p class="text-lg font-semibold">
             {{ formatDateDisplay(selectedDate) }}
           </p>
         </div>
@@ -153,9 +153,9 @@ onMounted(async () => {
     >
       <UIcon
         name="i-heroicons-calendar"
-        class="size-16 text-gray-300 mb-4"
+        class="size-16 mb-4"
       />
-      <p class="text-gray-500 text-center px-4">
+      <p class="text-center px-4">
         No daily reading available for this date!<br>
         Try another day.
       </p>
