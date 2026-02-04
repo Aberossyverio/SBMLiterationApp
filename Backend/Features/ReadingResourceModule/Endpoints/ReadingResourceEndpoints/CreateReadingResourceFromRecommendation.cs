@@ -6,7 +6,7 @@ using PureTCOWebApp.Core.Models;
 using PureTCOWebApp.Data;
 using PureTCOWebApp.Features.ReadingResourceModule.Domain;
 
-namespace PureTCOWebApp.Features.ReadingResourceModule.Endpoints.BookEndpoints;
+namespace PureTCOWebApp.Features.ReadingResourceModule.Endpoints.ReadingResourceEndpoints;
 
 public class CreateReadingResourceFromRecommendationRequestValidator : AbstractValidator<CreateReadingResourceFromRecommendationRequest>
 {
