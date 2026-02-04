@@ -13,6 +13,7 @@ export interface ReadingReportData {
   reportDate: string
   currentPage: number
   insight: string
+  resourceTitle: string
   timeSpent: number
   coverImageUri?: string | undefined
 }
@@ -27,7 +28,7 @@ const props = defineProps<{
 // Map backend reports to display format
 const mappedReports = computed(() => {
   return props.reports.map(report => ({
-    title: props.resourceTitle || 'Reading Resource',
+    resourceTitle: report.resourceTitle || 'Reading Resource',
     imageUrl: report.coverImageUri || '',
     insight: report.insight,
     readDate: new Date(report.reportDate).toISOString().split('T')[0],
