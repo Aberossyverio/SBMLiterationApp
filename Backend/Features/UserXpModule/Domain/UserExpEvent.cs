@@ -1,5 +1,6 @@
 using PureTCOWebApp.Core.Models;
 using PureTCOWebApp.Features.UserXpModule.Domain.Events;
+using PureTCOWebApp.Features.Auth.Domain;
 
 namespace PureTCOWebApp.Features.UserXpModule.Domain;
 
