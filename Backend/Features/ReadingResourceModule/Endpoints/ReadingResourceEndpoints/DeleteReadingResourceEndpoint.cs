@@ -1,9 +1,11 @@
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using PureTCOWebApp.Core;
 using PureTCOWebApp.Core.Models;
 using PureTCOWebApp.Data;
+using PureTCOWebApp.Features.ReadingResourceModule.Domain;
 
-namespace PureTCOWebApp.Features.ReadingResourceModule.Endpoints;
+namespace PureTCOWebApp.Features.ReadingResourceModule.Endpoints.ReadingResourceEndpoints;
 
 public record DeleteReadingResourceRequest(int Id);
 
@@ -22,60 +24,40 @@ public class DeleteReadingResourceEndpoint(
     {
         var userId = int.Parse(User.FindFirst("sub")!.Value);
         
-        // Try to find as Book first
-        var book = await _dbContext.Books.FindAsync([req.Id], ct);
-        if (book is not null)
+        var resource = await _dbContext.Set<ReadingResourceBase>()
+            .Include(r => r.ReadingReports)
+            .FirstOrDefaultAsync(r => r.Id == req.Id, ct);
+
+        if (resource is null)
         {
-            if (book.UserId != userId)
-            {
-                await Send.ForbiddenAsync(ct);
-                return;
-            }
-
-            if (book.ReadingReports.Any())
-            {
-                await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>((Result)new Error("DeleteFailed", "Cannot delete Book that you have read")));
-                return;
-            }
-            
-            _dbContext.Remove(book);
-            var result = await _unitOfWork.SaveChangesAsync(ct);
-
-            if (result.IsFailure)
-            {
-                await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>(result));
-                return;
-            }
-
-            await Send.OkAsync(Result.Success(), cancellation: ct);
+            var error = CrudDomainError.NotFound("ReadingResource", req.Id);
+            await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>((Result)error));
             return;
         }
 
-        // Try to find as JournalPaper
-        var journal = await _dbContext.JournalPapers.FindAsync([req.Id], ct);
-        if (journal is not null)
+        if (resource.UserId != userId)
         {
-            if (journal.UserId != userId)
-            {
-                await Send.ForbiddenAsync(ct);
-                return;
-            }
-            
-            _dbContext.Remove(journal);
-            var result = await _unitOfWork.SaveChangesAsync(ct);
-
-            if (result.IsFailure)
-            {
-                await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>(result));
-                return;
-            }
-
-            await Send.OkAsync(Result.Success(), cancellation: ct);
+            await Send.ForbiddenAsync(ct);
             return;
         }
 
-        // Not found
-        var error = CrudDomainError.NotFound("ReadingResource", req.Id);
-        await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>((Result)error));
+        if (!resource.CanBeDeleted())
+        {
+            var resourceType = resource is Book ? "Book" : "Journal Paper";
+            await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>(
+                (Result)new Error("DeleteFailed", $"Cannot delete {resourceType} that has reading reports")));
+            return;
+        }
+        
+        _dbContext.Remove(resource);
+        var result = await _unitOfWork.SaveChangesAsync(ct);
+
+        if (result.IsFailure)
+        {
+            await Send.ResultAsync(TypedResults.BadRequest<ApiResponse>(result));
+            return;
+        }
+
+        await Send.OkAsync(Result.Success(), cancellation: ct);
     }
 }

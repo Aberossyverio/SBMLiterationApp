@@ -21,6 +21,8 @@ public class ReadingResourceBase : AuditableEntity
     [JsonIgnore]
     public virtual ICollection<ReadingReport> ReadingReports { get; set; } = [];
 
+    public bool CanBeDeleted() => !ReadingReports.Any();
+
 #pragma warning disable CS8618
     public ReadingResourceBase() { }
 #pragma warning restore CS8618

@@ -3,9 +3,8 @@ using FluentValidation;
 using PureTCOWebApp.Core;
 using PureTCOWebApp.Core.Models;
 using PureTCOWebApp.Data;
-using PureTCOWebApp.Features.ReadingResourceModule.Domain;
 
-namespace PureTCOWebApp.Features.ReadingResourceModule.Endpoints;
+namespace PureTCOWebApp.Features.ReadingResourceModule.Endpoints.ReadingResourceEndpoints;
 
 public class UpdateReadingResourceRequestValidator : AbstractValidator<UpdateReadingResourceRequest>
 {

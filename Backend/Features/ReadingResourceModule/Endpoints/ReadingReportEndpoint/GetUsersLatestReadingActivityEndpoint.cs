@@ -16,7 +16,8 @@ public record UserLatestReadingActivity(
     int CurrentPage,
     string Insight,
     int TimeSpent,
-    string? CoverImageUri);
+    string? CoverImageUri
+);
 
 public class GetUsersLatestReadingActivityEndpoint(ApplicationDbContext context)
     : Endpoint<GetUsersLatestReadingActivityRequest, PagingResult<UserLatestReadingActivity>>
