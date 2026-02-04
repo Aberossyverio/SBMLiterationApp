@@ -2,7 +2,7 @@
 // TODO: add discriminator for display for Dashboard (with image) and non Dashboard (without image)
 defineProps<{
   report: {
-    title: string
+    resourceTitle: string
     imageUrl: string
     insight: string
     timeSpent?: number
@@ -54,10 +54,9 @@ defineProps<{
           <h1
             class="text-[13px] sm:text-[15px] tracking-tight font-bold line-clamp-1"
           >
-            {{ report.title }}
+            {{ report.resourceTitle }}
           </h1>
           <!-- TODO: Use chevron down icon -->
-          <UIcon name="i-lucide-chevron-down" />
         </div>
 
         <UBadge

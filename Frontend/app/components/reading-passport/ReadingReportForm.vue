@@ -151,7 +151,7 @@ async function onSubmit(event: FormSubmitEvent<ReadingReportSchema>) {
           <UButton
             type="submit"
             size="lg"
-            class="px-8 w-full text-center flex justify-center"
+            class="px-8 w-full text-center flex justify-center cursor-pointer"
             :loading
           >
             Save Reading Report
