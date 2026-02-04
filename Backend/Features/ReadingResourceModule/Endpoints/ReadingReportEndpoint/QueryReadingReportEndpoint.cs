@@ -32,7 +32,7 @@ public class QueryReadingReportEndpoint(ApplicationDbContext context)
 
     public override async Task HandleAsync(QueryReadingReportRequest req, CancellationToken ct)
     {
-        req = req with { SortBy = string.IsNullOrEmpty(req.SortBy) ? "Id" : req.SortBy };
+        req = req with { SortBy = string.IsNullOrEmpty(req.SortBy) ? "-Id" : req.SortBy };
         var userId = int.Parse(User.FindFirst("sub")!.Value);
 
         var query = context.ReadingReports

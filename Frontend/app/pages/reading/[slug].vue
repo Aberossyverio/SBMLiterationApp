@@ -15,6 +15,7 @@ const route = useRoute()
 
 const readingResource = ref<ReadingResource | null>(null)
 const readingReports = ref<ReadingReportData[]>([])
+const isReadingCompleted = computed(() => (readingReports.value[0]?.currentPage ?? 0) >= (readingResource.value?.page ?? 0))
 const pending = ref(false)
 const reportPending = ref(false)
 const form = useTemplateRef<typeof ReadingReportForm>('form')
@@ -139,7 +140,7 @@ onMounted(async () => {
           <template #header>
             <div class="flex flex-row items-start justify-between gap-4">
               <div class="text-white">
-                <div 
+                <div
                   class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full transition-all duration-200 cursor-pointer hover:bg-white/20 active:bg-white/30 active:scale-90 group"
                   @click="useRouter().back()"
                 >
@@ -253,13 +254,16 @@ onMounted(async () => {
         <!-- TODO: Style the report reading session button -->
         <UButton
           class="w-full flex justify-center py-4 bg-primary  cursor-pointer"
+          :loading="reportPending"
+          :disabled="isReadingCompleted"
+          :variant="isReadingCompleted ? 'ghost' : 'solid'"
           @click="form?.open()"
         >
           <nuxt-icon
             name="reading"
             class="text-2xl"
           />
-          Report Reading Session
+          {{ !isReadingCompleted ? 'Report Reading Session' : 'You have completed this reading.' }}
         </UButton>
 
         <div
