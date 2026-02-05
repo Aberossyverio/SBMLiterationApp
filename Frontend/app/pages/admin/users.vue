@@ -14,6 +14,7 @@ export interface User {
   name: string
   roles?: string[]
   isActive: boolean
+  disabled?: boolean
 }
 
 const table = useTemplateRef<typeof UsersTable>('table')
@@ -85,6 +86,28 @@ async function onDisable(user: User) {
     }
   })
 }
+
+async function onEnable(user: User) {
+  await dialog.confirm({
+    title: 'Enable User',
+    message: `Are you sure you want to enable this user? They will be able to access the system.`,
+    subTitle: `User: ${user.name} (${user.email})`,
+    async onOk() {
+      try {
+        await $authedFetch(`/users/${user.id}/enable`, {
+          method: 'GET'
+        })
+        toast.add({
+          title: 'User enabled successfully',
+          color: 'success'
+        })
+        table.value?.refresh()
+      } catch (error) {
+        handleResponseError(error)
+      }
+    }
+  })
+}
 </script>
 
 <template>
@@ -103,6 +126,7 @@ async function onDisable(user: User) {
           @assign-admin="onAssignAdmin"
           @unassign-admin="onUnassignAdmin"
           @disable="onDisable"
+          @enable="onEnable"
         />
       </div>
     </template>

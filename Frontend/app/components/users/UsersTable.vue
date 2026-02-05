@@ -27,7 +27,7 @@ defineExpose({
   refresh: paging.fetch
 })
 
-const emit = defineEmits(['assignAdmin', 'unassignAdmin', 'disable'])
+const emit = defineEmits(['assignAdmin', 'unassignAdmin', 'disable', 'enable'])
 
 const columns: TableColumn<User>[] = [
   {
@@ -42,46 +42,61 @@ const columns: TableColumn<User>[] = [
         'div',
         { class: 'flex justify-start gap-1' },
         [
-          h(UTooltip, {
-            text: 'Assign Admin Role',
-            delayDuration: 0
-          },
-          () =>
-            h(UButton, {
-              'icon': 'i-lucide-shield-plus',
-              'color': 'primary',
-              'variant': 'ghost',
-              'size': 'sm',
-              'aria-label': 'Assign admin',
-              'onClick': () => emit('assignAdmin', row.original)
-            })
-          ),
-          h(UTooltip, {
-            text: 'Unassign Admin Role',
-            delayDuration: 0
-          },
-          () =>
-            h(UButton, {
-              'icon': 'i-lucide-shield-minus',
-              'color': 'warning',
-              'variant': 'ghost',
-              'size': 'sm',
-              'aria-label': 'Unassign admin',
-              'onClick': () => emit('unassignAdmin', row.original)
-            })),
-          h(UTooltip, {
-            text: 'Disable User',
-            delayDuration: 0
-          },
-          () =>
-            h(UButton, {
-              'icon': 'i-lucide-user-x',
-              'color': 'error',
-              'variant': 'ghost',
-              'size': 'sm',
-              'aria-label': 'Disable user',
-              'onClick': () => emit('disable', row.original)
-            }))
+          !row.original.roles?.includes('admin')
+            ? h(UTooltip, {
+                text: 'Assign Admin Role',
+                delayDuration: 0
+              },
+              () =>
+                h(UButton, {
+                  'icon': 'i-lucide-shield-plus',
+                  'color': 'success',
+                  'variant': 'ghost',
+                  'size': 'sm',
+                  'aria-label': 'Assign admin',
+                  'onClick': () => emit('assignAdmin', row.original)
+                })
+              )
+            : h(UTooltip, {
+                text: 'Unassign Admin Role',
+                delayDuration: 0
+              },
+              () =>
+                h(UButton, {
+                  'icon': 'i-lucide-shield-minus',
+                  'color': 'error',
+                  'variant': 'ghost',
+                  'size': 'sm',
+                  'aria-label': 'Unassign admin',
+                  'onClick': () => emit('unassignAdmin', row.original)
+                })),
+          !row.original.disabled
+            ? h(UTooltip, {
+                text: 'Disable User',
+                delayDuration: 0
+              },
+              () =>
+                h(UButton, {
+                  'icon': 'i-lucide-user-x',
+                  'color': 'error',
+                  'variant': 'ghost',
+                  'size': 'sm',
+                  'aria-label': 'Disable user',
+                  'onClick': () => emit('disable', row.original)
+                }))
+            : h(UTooltip, {
+                text: 'Enable User',
+                delayDuration: 0
+              },
+              () =>
+                h(UButton, {
+                  'icon': 'i-lucide-user-plus',
+                  'color': 'success',
+                  'variant': 'ghost',
+                  'size': 'sm',
+                  'aria-label': 'Enable user',
+                  'onClick': () => emit('enable', row.original)
+                }))
         ]
       )
     }
@@ -132,7 +147,7 @@ const columns: TableColumn<User>[] = [
       }
     },
     cell: ({ row }) => {
-      const isActive = row.original.isActive
+      const isActive = !row.original.disabled
       return h('span', {
         class: isActive
           ? 'px-2 py-1 text-xs rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
