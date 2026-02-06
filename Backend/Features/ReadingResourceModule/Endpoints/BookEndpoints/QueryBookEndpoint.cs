@@ -81,6 +81,11 @@ public class QueryBookEndpoint(ApplicationDbContext dbContext)
                                         .Where(r => r.ReadingResourceId == book.Id)
                                         .OrderByDescending(r => r.ReportDate)
                                         .Select(r => (DateTime?)r.ReportDate)
+                                        .FirstOrDefault(),
+                                    LastReadPage = dbContext.ReadingReports
+                                        .Where(r => r.ReadingResourceId == book.Id)
+                                        .OrderByDescending(r => r.ReportDate)
+                                        .Select(r => (int?)r.CurrentPage)
                                         .FirstOrDefault()
                                 };
 
@@ -92,16 +97,9 @@ public class QueryBookEndpoint(ApplicationDbContext dbContext)
         var pagedBooks = await PagingService.PaginateQueryAsync(queryWithLastRead.Select(x => x.Book), req, dbContext, ct);
 
         var bookIds = pagedBooks.Rows.Select(b => b.Id).ToList();
-
-        var lastReadPages = await dbContext.ReadingReports
-            .Where(r => r.UserId == userId && bookIds.Contains(r.ReadingResourceId))
-            .GroupBy(r => r.ReadingResourceId)
-            .Select(g => new
-            {
-                ReadingResourceId = g.Key,
-                LastReadPage = g.OrderByDescending(r => r.ReportDate).First().CurrentPage
-            })
-            .ToDictionaryAsync(x => x.ReadingResourceId, x => x.LastReadPage, ct);
+        var lastReadData = await queryWithLastRead
+            .Where(x => bookIds.Contains(x.Book.Id))
+            .ToDictionaryAsync(x => x.Book.Id, x => x.LastReadPage, ct);
 
         var booksWithProgress = pagedBooks.Rows.Select(b => new BookWithProgress(
             b.Id,
@@ -115,7 +113,7 @@ public class QueryBookEndpoint(ApplicationDbContext dbContext)
             b.ResourceLink,
             b.CoverImageUri,
             b.CssClass,
-            lastReadPages.GetValueOrDefault(b.Id)
+            lastReadData.GetValueOrDefault(b.Id)
         )).ToList();
 
         var result = new PagingResult<BookWithProgress>(
