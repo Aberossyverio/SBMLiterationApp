@@ -86,6 +86,9 @@ public class QueryJournalPaperEndpoint(ApplicationDbContext dbContext)
 
         queryWithLastRead = queryWithLastRead.OrderByDescending(x => x.LastReadDate);
 
+        // Set SortBy to empty to preserve our custom ordering
+        req = req with { SortBy = "" };
+
         var pagedJournals = await PagingService.PaginateQueryAsync(queryWithLastRead.Select(x => x.Journal), req, dbContext, ct);
 
         var journalIds = pagedJournals.Rows.Select(j => j.Id).ToList();

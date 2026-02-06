@@ -1,5 +1,4 @@
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PureTCOWebApp.Core.Paging;
 using PureTCOWebApp.Data;
@@ -86,6 +85,9 @@ public class QueryBookEndpoint(ApplicationDbContext dbContext)
                                 };
 
         queryWithLastRead = queryWithLastRead.OrderByDescending(x => x.LastReadDate);
+
+        // Override SortBy to prevent PagingService from re-ordering
+        req = req with { SortBy = "" };
 
         var pagedBooks = await PagingService.PaginateQueryAsync(queryWithLastRead.Select(x => x.Book), req, dbContext, ct);
 
