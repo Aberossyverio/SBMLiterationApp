@@ -13,7 +13,7 @@ interface PersistedReadingReportState {
 export function usePersistedReadingReport() {
   const STORAGE_PREFIX = 'reading-report-'
 
-  function getStorageKey(readingResourceId: number): string {
+  function getStorageKey(readingResourceId: number | string): string {
     return `${STORAGE_PREFIX}${readingResourceId}`
   }
 
@@ -76,7 +76,7 @@ export function usePersistedReadingReport() {
     saveReportState(state)
   }
 
-  function clearReportState(readingResourceId: number): void {
+  function clearReportState(readingResourceId: number | string): void {
     if (typeof window === 'undefined') return
 
     const key = getStorageKey(readingResourceId)

@@ -64,6 +64,38 @@ function continueReport(slug: string) {
   router.push(`/reading/${slug}`)
 }
 
+function deleteQuiz(slug: string) {
+  dialog.confirm({
+    title: 'Delete Quiz Progress',
+    subTitle: 'This action cannot be undone',
+    message: 'Are you sure you want to delete your progress for this quiz?',
+    onOk: () => {
+      quizComposable.clearQuizState(slug)
+      loadUnfinishedQuizzes()
+      toast.add({
+        title: 'Quiz progress deleted',
+        color: 'success'
+      })
+    }
+  })
+}
+
+function deleteReport(readingResourceId: number) {
+  dialog.confirm({
+    title: 'Delete Reading Report Draft',
+    subTitle: 'This action cannot be undone',
+    message: 'Are you sure you want to delete this draft reading report?',
+    onOk: () => {
+      reportComposable.clearReportState(readingResourceId)
+      loadUnfinishedReports()
+      toast.add({
+        title: 'Reading report draft deleted',
+        color: 'success'
+      })
+    }
+  })
+}
+
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
@@ -326,7 +358,7 @@ function toggleColorMode() {
                   Draft: {{ report.insight.substring(0, 100) }}{{ report.insight.length > 100 ? '...' : '' }}
                 </div>
               </div>
-              <div class="ml-4">
+              <div class="ml-4 flex gap-2">
                 <UButton
                   color="primary"
                   variant="soft"
@@ -337,6 +369,12 @@ function toggleColorMode() {
                     <UIcon name="i-heroicons-arrow-right" />
                   </template>
                 </UButton>
+                <UButton
+                  color="error"
+                  variant="ghost"
+                  icon="i-heroicons-trash"
+                  @click="deleteReport(report.readingResourceId)"
+                />
               </div>
             </div>
           </div>
@@ -397,7 +435,7 @@ function toggleColorMode() {
                   </div>
                 </div>
               </div>
-              <div class="ml-4">
+              <div class="ml-4 flex gap-2">
                 <UButton
                   color="primary"
                   variant="soft"
@@ -408,6 +446,12 @@ function toggleColorMode() {
                     <UIcon name="i-heroicons-arrow-right" />
                   </template>
                 </UButton>
+                <UButton
+                  color="error"
+                  variant="ghost"
+                  icon="i-heroicons-trash"
+                  @click="deleteQuiz(quiz.slug)"
+                />
               </div>
             </div>
           </div>

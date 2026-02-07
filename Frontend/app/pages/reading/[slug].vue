@@ -75,6 +75,7 @@ const latestPageProgress = computed(() => {
 })
 
 const router = useRouter()
+const persistedReport = usePersistedReadingReport()
 onMounted(async () => {
   // fetch reading resource detail
   try {
@@ -84,12 +85,12 @@ onMounted(async () => {
       readingResource.value = response.data
     else {
       handleResponseError(response)
-      form.value?.clearPersistedState()
+      persistedReport.clearReportState(route.params.slug as string)
       router.back()
     }
   } catch (err) {
     handleResponseError(err)
-    form.value?.clearPersistedState()
+    persistedReport.clearReportState(route.params.slug as string)
     router.back()
   } finally {
     pending.value = false

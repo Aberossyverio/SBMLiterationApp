@@ -31,6 +31,7 @@ watch(error, (err) => {
 })
 
 function fetchReadingResources() {
+  if (!readingResource.value?.fetch) return
   readingResource.value?.fetch()
 }
 
