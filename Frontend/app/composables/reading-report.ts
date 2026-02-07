@@ -1,3 +1,5 @@
+import { useAuth } from '~/apis/api'
+
 interface PersistedReadingReportState {
   readingResourceId: number
   slug: string
@@ -12,6 +14,27 @@ interface PersistedReadingReportState {
 
 export function usePersistedReadingReport() {
   const STORAGE_PREFIX = 'reading-report-'
+  const AUTH_PREFIX = 'auth-reading-report-user-full-name'
+
+  function init() {
+    if (import.meta.client) {
+      const auth = useAuth()
+      const fullname = auth.getFullname()
+      if (fullname && localStorage.getItem(AUTH_PREFIX) !== fullname) {
+        // Clear all reading data if user has changed
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && key.startsWith(STORAGE_PREFIX)) {
+            localStorage.removeItem(key)
+          }
+        }
+        localStorage.setItem(AUTH_PREFIX, fullname)
+      }
+      if (fullname)
+        localStorage.setItem(AUTH_PREFIX, fullname)
+    }
+  }
+  init()
 
   function getStorageKey(readingResourceId: number | string): string {
     return `${STORAGE_PREFIX}${readingResourceId}`
@@ -112,12 +135,29 @@ export function usePersistedReadingReport() {
     )
   }
 
+  function clearAllReports(): void {
+    if (typeof window === 'undefined') return
+
+    const keysToRemove: string[] = []
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(STORAGE_PREFIX)) {
+        keysToRemove.push(key)
+      }
+    }
+
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+  }
+
   return {
     getReportState,
     initReportState,
     updateReportState,
     clearReportState,
-    getUnfinishedReports
+    getUnfinishedReports,
+    clearAllReports,
+    init
   }
 }
 

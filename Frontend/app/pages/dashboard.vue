@@ -39,10 +39,12 @@ function fetchRecommendation() {
   recommendation.value?.fetch()
 }
 
-const quizComposable = usePersistedQuiz()
-
 onMounted(() => {
-  quizComposable.cleanupStaleQuizzes()
+  const quizComposable = usePersistedQuiz()
+  const reportState = usePersistedReadingReport()
+
+  quizComposable.init()
+  reportState.init()
 })
 
 const tabs = ref<TabsItem[]>([

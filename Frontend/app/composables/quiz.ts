@@ -1,3 +1,5 @@
+import { useAuth } from '~/apis/api'
+
 interface QuizAnswer {
   questionSeq: number
   answer: string
@@ -17,6 +19,29 @@ interface PersistedQuizState {
 
 export function usePersistedQuiz() {
   const STORAGE_PREFIX = 'quiz-'
+  const AUTH_PREFIX = 'auth-quiz-user-full-name'
+
+  function init() {
+    if (import.meta.client) {
+      const auth = useAuth()
+
+      const fullname = auth.getFullname()
+      if (fullname && localStorage.getItem(AUTH_PREFIX) !== fullname) {
+      // Clear all quiz data if user has changed
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && key.startsWith(STORAGE_PREFIX)) {
+            localStorage.removeItem(key)
+          }
+        }
+      }
+      if (fullname)
+        localStorage.setItem(AUTH_PREFIX, fullname)
+    }
+
+    cleanupStaleQuizzes()
+  }
+  init()
 
   function getStorageKey(slug: string): string {
     return `${STORAGE_PREFIX}${slug}`
@@ -219,7 +244,8 @@ export function usePersistedQuiz() {
     getUnansweredQuestions,
     cleanupStaleQuizzes,
     validateQuizDate,
-    getTodayDate
+    getTodayDate,
+    init
   }
 }
 
