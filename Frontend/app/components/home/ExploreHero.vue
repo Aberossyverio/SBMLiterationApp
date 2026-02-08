@@ -31,7 +31,6 @@
             </li>
           </ol>
 
-
           <UButton
             class="px-8 py-4 w-fit rounded-full font-[700]"
             label="Start Reading Now"
@@ -57,23 +56,23 @@
 const datas = [
   {
     title: 'Choose What You Want to Read',
-    desc: 'Pick your reading and start tracking your progress everyday.',
+    desc: 'Pick your reading and start tracking your progress everyday.'
   },
   {
     title: 'Read at Your Own Pace',
-    desc: 'Anytime. Anywhere. Even 1 minute or 1 page counts.',
+    desc: 'Anytime. Anywhere. Even 1 minute or 1 page counts.'
   },
   {
     title: 'Log & Reflect',
-    desc: 'Share short reflections and do a daily check-in.',
+    desc: 'Share short reflections and do a daily check-in.'
   },
   {
     title: 'Earn Points & Build Streaks',
-    desc: 'Consistency is rewarded. Progress is visible.',
+    desc: 'Consistency is rewarded. Progress is visible.'
   },
   {
     title: 'Grow—Quietly but Powerfully',
-    desc: 'Better ideas. Broader perspectives. Stronger thinking.',
+    desc: 'Better ideas. Broader perspectives. Stronger thinking.'
   }
 ]
 </script>
