@@ -65,8 +65,7 @@ public class CreateReadingResourceFromRecommendationEndpoint(
         }
 
         if (
-            await _dbContext.Books.AnyAsync(b => b.UserId == userId && (b.ISBN == recommendation.ISBN))
-            || await _dbContext.JournalPapers.AnyAsync(j => j.UserId == userId && (j.ResourceLink == recommendation.ResourceLink))
+            await _dbContext.Books.AnyAsync(b => b.UserId == userId && b.ISBN == recommendation.ISBN, ct)
         )
         {
             await Send.ResultAsync(TypedResults.Conflict<ApiResponse>(
