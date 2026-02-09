@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PureTCOWebApp.Core.Paging;
 using PureTCOWebApp.Data;
-using PureTCOWebApp.Features.Auth.Domain;
-using PureTCOWebApp.Features.UserXpModule.Domain;
 
 namespace PureTCOWebApp.Features.UserXpModule;
 
@@ -72,6 +70,7 @@ public class UserExpDomainService(ApplicationDbContext _context)
             {
                 Exp = item.Exp,
                 Username = item.User.Fullname,
+                PictureUrl = item.User.PictureUrl,
                 Rank = 0 // Will be set after pagination
             },
             ct);
@@ -100,6 +99,7 @@ public class UserExpDomainService(ApplicationDbContext _context)
         public int Rank { get; set; }
         public decimal Exp { get; set; }
         public string Username { get; set; } = null!;
+        public string? PictureUrl { get; set; }
     }
     
     private class IntResult

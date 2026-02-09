@@ -81,24 +81,25 @@ public class QueryJournalPaperEndpoint(ApplicationDbContext dbContext)
                                         .Where(r => r.ReadingResourceId == journal.Id)
                                         .OrderByDescending(r => r.ReportDate)
                                         .Select(r => (DateTime?)r.ReportDate)
+                                        .FirstOrDefault(),
+                                    LastReadPage = dbContext.ReadingReports
+                                        .Where(r => r.ReadingResourceId == journal.Id)
+                                        .OrderByDescending(r => r.ReportDate)
+                                        .Select(r => (int?)r.CurrentPage)
                                         .FirstOrDefault()
                                 };
 
         queryWithLastRead = queryWithLastRead.OrderByDescending(x => x.LastReadDate);
 
+        // Set SortBy to empty to preserve our custom ordering
+        req = req with { SortBy = "" };
+
         var pagedJournals = await PagingService.PaginateQueryAsync(queryWithLastRead.Select(x => x.Journal), req, dbContext, ct);
 
         var journalIds = pagedJournals.Rows.Select(j => j.Id).ToList();
-
-        var lastReadPages = await dbContext.ReadingReports
-            .Where(r => r.UserId == userId && journalIds.Contains(r.ReadingResourceId))
-            .GroupBy(r => r.ReadingResourceId)
-            .Select(g => new
-            {
-                ReadingResourceId = g.Key,
-                LastReadPage = g.OrderByDescending(r => r.ReportDate).First().CurrentPage
-            })
-            .ToDictionaryAsync(x => x.ReadingResourceId, x => x.LastReadPage, ct);
+        var lastReadData = await queryWithLastRead
+            .Where(x => journalIds.Contains(x.Journal.Id))
+            .ToDictionaryAsync(x => x.Journal.Id, x => x.LastReadPage, ct);
 
         var journalsWithProgress = pagedJournals.Rows.Select(j => new JournalPaperWithProgress(
             j.Id,
@@ -112,7 +113,7 @@ public class QueryJournalPaperEndpoint(ApplicationDbContext dbContext)
             j.ResourceLink,
             j.CoverImageUri,
             j.CssClass,
-            lastReadPages.GetValueOrDefault(j.Id)
+            lastReadData.GetValueOrDefault(j.Id)
         )).ToList();
 
         var result = new PagingResult<JournalPaperWithProgress>(

@@ -1,4 +1,5 @@
 using PureTCOWebApp.Core.Models;
+using PureTCOWebApp.Features.DailyReadsModule.Domain.Events;
 
 namespace PureTCOWebApp.Features.DailyReadsModule.Domain;
 
@@ -19,7 +20,7 @@ public class DailyRead : AuditableEntity
 
     public static DailyRead Create(string title, string content, DateOnly date, string? coverImg = null, string? category = null, decimal exp = 0, int minimalCorrectAnswer = 0)
     {
-        return new DailyRead
+        var entity = new DailyRead
         {
             Title = title,
             Content = content,
@@ -29,6 +30,10 @@ public class DailyRead : AuditableEntity
             Exp = exp,
             MinimalCorrectAnswer = minimalCorrectAnswer
         };
+
+        entity.Raise(new DailyReadCreatedEvent(entity));
+
+        return entity;
     }
 
     public void Update(string title, string content, DateOnly date, string? coverImg = null, string? category = null, decimal exp = 0, int minimalCorrectAnswer = 0)

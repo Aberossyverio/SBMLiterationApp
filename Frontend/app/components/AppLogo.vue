@@ -1,4 +1,17 @@
+<script lang="ts" setup>
+const colorMode = useColorMode()
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark'
+  },
+  set(_isDark) {
+    colorMode.preference = _isDark ? 'dark' : 'light'
+  }
+})
+</script>
+
 <template>
+  <!--
   <svg
     viewBox="0 0 2810 1080"
     fill="none"
@@ -49,4 +62,15 @@
       fill="currentColor"
     />
   </svg>
+  -->
+  <ClientOnly>
+    <img
+      v-if="isDark"
+      src="/5.png"
+    >
+    <img
+      v-else
+      src="/3.png"
+    >
+  </ClientOnly>
 </template>

@@ -31,6 +31,19 @@ const toast = useToast()
 const dailyReadId = computed(() => route.params.id as string)
 const dailyReadData = ref<DailyRead | null>(null)
 
+const tabs = [
+  {
+    label: 'Daily Read Details',
+    slot: 'details',
+    icon: 'i-heroicons-document-text'
+  },
+  {
+    label: 'Quiz Questions',
+    slot: 'quiz',
+    icon: 'i-heroicons-question-mark-circle'
+  }
+]
+
 async function fetchDailyRead() {
   try {
     pending.value = true
@@ -146,7 +159,6 @@ async function onSubmit(param: {
 
       <div
         v-else
-        class="max-w-7xl mx-auto"
       >
         <div class="flex items-center gap-2 mb-6">
           <UButton
@@ -160,24 +172,22 @@ async function onSubmit(param: {
           </h1>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6 pr-6">
-          <div>
+        <UTabs :items="tabs">
+          <template #details>
             <DailyReadForm
               ref="form"
               :loading="formLoading"
               @submit="onSubmit"
             />
-          </div>
+          </template>
 
-          <div class="lg:sticky lg:top-6 lg:self-start">
-            <UCard>
-              <DailyReadQuizForm
-                ref="quizForm"
-                :daily-read-id="dailyReadData?.id ? Number(dailyReadData.id) : null"
-              />
-            </UCard>
-          </div>
-        </div>
+          <template #quiz>
+            <DailyReadQuizForm
+              ref="quizForm"
+              :daily-read-id="dailyReadData?.id ? Number(dailyReadData.id) : null"
+            />
+          </template>
+        </UTabs>
       </div>
     </template>
   </UDashboardPanel>

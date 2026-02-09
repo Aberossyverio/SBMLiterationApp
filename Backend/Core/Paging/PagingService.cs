@@ -91,9 +91,13 @@ public static class PagingService
         CancellationToken ct)
         where T : AuditableEntity, new()
     {
-        var sortBy = ConvertSortByParams(filter.SortBy ?? "-CreateTime");
+        // If SortBy is explicitly empty string, skip ordering to preserve existing order
+        // If SortBy is null, use default -CreateTime
+        var sortBy = filter.SortBy == "" ? "" : (filter.SortBy ?? "-CreateTime");
+        sortBy = ConvertSortByParams(sortBy);
 
-        var qry = OrderByStringValues(sourceQry, sortBy).AsNoTracking();
+        var qry = string.IsNullOrEmpty(sortBy) ? sourceQry : OrderByStringValues(sourceQry, sortBy);
+        qry = qry.AsNoTracking();
 
         int itemCount = await sourceQry.CountAsync(ct);
         int pageCount = (int)Math.Ceiling(itemCount / (double)(filter.RowsPerPage));

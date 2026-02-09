@@ -49,24 +49,27 @@ onBeforeUnmount(() => {
 })
 </script>
 
-
 <template>
   <section class="py-[40px] md:py-[60px]">
     <UContainer>
       <div class="flex justify-center text-3xl mb-5">
-        <Icon name='ph:quotes-fill' />
+        <Icon name="ph:quotes-fill" />
       </div>
-     <div class="h-[190px] sm:h-[140px] lg:h-[108px] xl:h-[102px]">
-      <h1 class='typewriter font-semibold text-3xl lg:text-3xl xl:text-4xl tracking-tight text-center dark:text-primary'>
-        <span v-for='(line, i) in displayedLines' :key='i'>
-          {{ line }}<br v-if='i < displayedLines.length - 1' />
-        </span>
-      </h1>
-     </div>
-     <div class="flex justify-center">
-      <h1 class="tracking-tight font-semibold italic">- Najwa Shihab -</h1>
-     </div>
+      <div class="h-[190px] sm:h-[140px] lg:h-[108px] xl:h-[102px]">
+        <h1 class="typewriter font-semibold text-3xl lg:text-3xl xl:text-4xl tracking-tight text-center dark:text-primary">
+          <span
+            v-for="(line, i) in displayedLines"
+            :key="i"
+          >
+            {{ line }}<br v-if="i < displayedLines.length - 1">
+          </span>
+        </h1>
+      </div>
+      <div class="flex justify-center">
+        <h1 class="tracking-tight font-semibold italic">
+          - Najwa Shihab -
+        </h1>
+      </div>
     </UContainer>
   </section>
 </template>
-
