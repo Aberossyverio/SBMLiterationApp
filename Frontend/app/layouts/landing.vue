@@ -89,7 +89,9 @@ function goToDashboard() {
       <slot />
     </UMain>
 
-    <USeparator icon="i-simple-icons-nuxtdotjs" />
+    <USeparator>
+      <img src="/5.png" class="h-auto w-36" alt="Logo" />
+    </USeparator>
 
     <UFooter>
       <template #left>

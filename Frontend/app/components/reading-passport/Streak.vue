@@ -83,7 +83,7 @@ const showRightMonth = computed(() => {
   >
     <div>
       <nuxt-img
-        class="max-h-[100px]"
+        class="max-h-[117px]"
         src="/fire.png"
       />
     </div>
