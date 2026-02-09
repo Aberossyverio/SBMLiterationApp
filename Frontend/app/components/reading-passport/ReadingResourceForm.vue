@@ -3,7 +3,7 @@ import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
 import { $authedFetch, handleResponseError } from '~/apis/api'
 import GoogleBooksSearchModal from '~/components/recommendation/GoogleBooksSearchModal.vue'
-import type { GoogleBookVolume } from '~/components/recommendation/GoogleBooksSearchModal.vue'
+import type { GoogleBooksSelection } from '~/components/recommendation/GoogleBooksSearchModal.vue'
 
 interface JournalDoiResponse {
   message: string
@@ -164,21 +164,16 @@ function openGoogleBooksSearch() {
   googleBooksModal.value?.open()
 }
 
-function handleBookSelection(book: GoogleBookVolume) {
-  const isbn = book.volumeInfo.industryIdentifiers?.find(
-    id => id.type === 'ISBN_13' || id.type === 'ISBN_10'
-  )?.identifier || ''
-
-  state.title = book.volumeInfo.title || ''
-  state.isbn = isbn
-  state.authors = book.volumeInfo.authors && book.volumeInfo.authors.length > 0
-    ? book.volumeInfo.authors
-    : ['']
-  state.publishYear = book.volumeInfo.publishedDate?.substring(0, 4) || ''
-  state.readingCategory = book.volumeInfo.categories?.[0] || ''
-  state.page = book.volumeInfo.pageCount || 0
-  state.resourceLink = book.volumeInfo.previewLink || book.volumeInfo.infoLink || ''
-  state.coverImageUri = book.volumeInfo.imageLinks?.thumbnail || book.volumeInfo.imageLinks?.smallThumbnail || ''
+function handleBookSelection(book: GoogleBooksSelection) {
+  state.title = book.title
+  state.isbn = book.isbn
+  state.authors = book.authors ? book.authors.split(', ').filter(a => a.trim()) : ['']
+  if (state.authors.length === 0) state.authors = ['']
+  state.publishYear = book.publishYear
+  state.readingCategory = book.category
+  state.page = book.page
+  state.resourceLink = book.resourceLink
+  state.coverImageUri = book.coverImageUri
 
   toast.add({
     title: 'Book details imported from Google Books',
@@ -342,13 +337,13 @@ async function onSubmit(event: FormSubmitEvent<ReadingResourceSchema>) {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <UFormField
           v-if="!journal"
-          label="ISBN"
+          label="ISBN/Identifier"
           name="isbn"
           required
         >
           <UInput
             v-model="state.isbn"
-            placeholder="Enter ISBN"
+            placeholder="Enter ISBN or other identifier"
             size="lg"
             class="w-full"
           />
