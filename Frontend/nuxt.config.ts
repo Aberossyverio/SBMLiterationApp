@@ -12,7 +12,7 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt'
   ],
 
-  plugins: ['~/plugins/fetch'],
+  plugins: ['~/plugins/fetch', '~/plugins/audio.client'],
   $development: {
     runtimeConfig: {
       backendApiUri: 'http://10.8.0.3:8000/api',

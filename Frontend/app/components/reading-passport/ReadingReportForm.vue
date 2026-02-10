@@ -60,7 +60,6 @@ const pageOptions = computed(() => {
       label: `Page ${page} (${percentage}%)`
     })
   }
-  console.log(options)
   return options
 })
 

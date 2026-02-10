@@ -20,7 +20,10 @@ interface WeekDateDisplay {
 
 const useAuthedFetch = useNuxtApp().$useAuthedFetch
 
-const { data: response, pending, error } = await useAuthedFetch<ApiResponse<StreakData>>('/streaks/me')
+const { data: response, pending, error, execute }
+  = await useAuthedFetch<ApiResponse<StreakData>>('/streaks/me', {
+    lazy: true
+  })
 
 watch(error, (err) => {
   if (err) handleResponseError(err)
@@ -32,13 +35,11 @@ const weekDates = computed<WeekDateDisplay[]>(() => {
   if (!streakData?.value?.weeklyStatus) return []
 
   return streakData.value.weeklyStatus.map((status) => {
-    // Parse yyyy-mm-dd format explicitly
-    const [year, month, day] = status.date.split('-').map(Number)
-    const date = new Date(year || 2026, (month || 1) - 1, day) // month is 0-indexed
+    const date = new Date(status.date)
+    date.setHours(0, 0, 0, 0)
 
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    date.setHours(0, 0, 0, 0)
 
     return {
       date,
@@ -63,6 +64,21 @@ const showRightMonth = computed(() => {
   const firstDate = weekDates.value[0]
   // Show right month if it's different from first month
   return lastDate?.month !== firstDate?.month ? lastDate?.month : null
+})
+
+const streakStore = useStreak()
+onMounted(async () => {
+  await execute()
+  if (streakData.value?.currentStreakDays !== undefined) {
+    const todayHasStreaked = streakData.value.weeklyStatus.some((status) => {
+      const today = new Date()
+      const date = new Date(status.date)
+      today.setHours(0, 0, 0, 0)
+      date.setHours(0, 0, 0, 0)
+      return date.getTime() === today.getTime() && status.hasStreak
+    })
+    streakStore.setStreak(streakData.value?.currentStreakDays, todayHasStreaked)
+  }
 })
 </script>
 
