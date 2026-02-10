@@ -84,7 +84,6 @@ export default defineNuxtConfig({
       lang: 'en',
       display: 'standalone',
       orientation: 'portrait',
-      start_url: '/dashboard',
       background_color: '#ffffff',
       icons: [
         {
@@ -113,7 +112,34 @@ export default defineNuxtConfig({
     workbox: {
       navigateFallback: '/',
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      importScripts: ['/sw-custom.js']
+      importScripts: ['/sw-custom.js'],
+      navigateFallbackDenylist: [/^\/auth/, /^\/api/, /\?code=/, /\?state=/],
+
+      runtimeCaching: [
+        {
+          // Don't cache auth/API routes
+          urlPattern: /^https:\/\/.*\/api\/.*/i,
+          handler: 'NetworkOnly'
+        },
+        {
+          // Don't cache OAuth callbacks
+          urlPattern: /\/(auth|callback|login)/,
+          handler: 'NetworkOnly'
+        },
+        {
+          // Cache pages (except auth)
+          urlPattern: /^https:\/\/.*/i,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'pages-cache',
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 24 * 60 * 60 // 24 hours
+            },
+            networkTimeoutSeconds: 10
+          }
+        }
+      ]
     },
     client: {
       installPrompt: true,
