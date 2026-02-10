@@ -70,12 +70,6 @@ public class UpdateDailyReadEndpoint(
             return;
         }
 
-        if (await dbContext.DailyReads.AnyAsync(x => x.Date == req.Date && x.Id != id, ct))
-        {
-            await Send.ResultAsync(TypedResults.Conflict<ApiResponse>((Result)CrudDomainError.Duplicate("DailyRead", "Date")));
-            return;
-        }
-
         dailyRead.Update(req.Title, req.Content, req.Date, req.CoverImg, req.Category, req.Exp, req.MinimalCorrectAnswer);
 
         var result = await unitOfWork.SaveChangesAsync(ct);

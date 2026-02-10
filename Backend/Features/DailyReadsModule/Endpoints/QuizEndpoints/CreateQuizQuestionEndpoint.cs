@@ -82,29 +82,38 @@ public class CreateQuizQuestionEndpoint(
         }
 
         // Check if question seq already exists
-        var exists = await dbContext.QuizQuestions
-            .AnyAsync(q => q.DailyReadId == dailyReadId && q.QuestionSeq == req.QuestionSeq, ct);
+        var exists = await dbContext
+            .QuizQuestions
+            .Include(e => e.Choices)
+            .FirstOrDefaultAsync(q => q.DailyReadId == dailyReadId && q.QuestionSeq == req.QuestionSeq, ct);
 
-        if (exists)
+        if (exists is not null)
         {
-            await Send.ResultAsync(TypedResults.Conflict<ApiResponse>(
-                Result.Failure(new Error("QuestionSeqExists", $"Question Seq {req.QuestionSeq} already exists for this Daily Read."))));
-            return;
+            exists.Update(req.Question.Trim(), req.CorrectAnswer.ToUpper().Trim());
+            exists.ClearChoices();
+
+            foreach (var choiceDto in req.Choices)
+            {
+                exists.AddChoice(choiceDto.Choice.ToUpper().Trim(), choiceDto.Answer.Trim());
+            }
+        }
+        else
+        {
+            var quizQuestion = QuizQuestion.Create(
+                dailyReadId,
+                req.QuestionSeq,
+                req.Question.Trim(),
+                req.CorrectAnswer.ToUpper().Trim()
+            );
+
+            foreach (var choiceDto in req.Choices)
+            {
+                quizQuestion.AddChoice(choiceDto.Choice.ToUpper().Trim(), choiceDto.Answer.Trim());
+            }
+
+            await dbContext.AddAsync(quizQuestion, ct);
         }
 
-        var quizQuestion = QuizQuestion.Create(
-            dailyReadId,
-            req.QuestionSeq,
-            req.Question.Trim(),
-            req.CorrectAnswer.ToUpper().Trim()
-        );
-
-        foreach (var choiceDto in req.Choices)
-        {
-            quizQuestion.AddChoice(choiceDto.Choice.ToUpper().Trim(), choiceDto.Answer.Trim());
-        }
-
-        await dbContext.AddAsync(quizQuestion, ct);
         var result = await unitOfWork.SaveChangesAsync(ct);
 
         if (result.IsFailure)

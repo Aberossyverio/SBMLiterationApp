@@ -64,12 +64,6 @@ public class CreateDailyReadEndpoint(
 
     public override async Task HandleAsync(CreateDailyReadRequest req, CancellationToken ct)
     {
-        if (await dbContext.DailyReads.AnyAsync(x => x.Date == req.Date, ct))
-        {
-            await Send.ResultAsync(TypedResults.Conflict<ApiResponse>((Result)CrudDomainError.Duplicate("DailyRead", "Date")));
-            return;
-        }
-
         var dailyRead = DailyRead.Create(req.Title, req.Content, req.Date, req.CoverImg, req.Category, req.Exp, req.MinimalCorrectAnswer);
 
         await dbContext.AddAsync(dailyRead, ct);
