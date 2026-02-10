@@ -10,10 +10,24 @@ definePageMeta({
 })
 
 const quizForm = useTemplateRef<typeof DailyReadQuizForm>('quizForm')
+const form = useTemplateRef<typeof DailyReadForm>('form')
 const formLoading = ref(false)
 const toast = useToast()
 const router = useRouter()
 const dailyReadId = ref<number | null>(null)
+
+const tabs = [
+  {
+    label: 'Daily Read Details',
+    slot: 'details',
+    icon: 'i-heroicons-document-text'
+  },
+  {
+    label: 'Quiz Questions',
+    slot: 'quiz',
+    icon: 'i-heroicons-question-mark-circle'
+  }
+]
 
 async function onSubmit(param: {
   action: 'Create' | 'Update'
@@ -41,9 +55,14 @@ async function onSubmit(param: {
 
     dailyReadId.value = response.data?.id
 
+    if (!dailyReadId.value) {
+      handleResponseError(response)
+      return
+    }
+
     // Then, upload quiz if file is selected
     const quizFile = quizForm.value?.getQuizFile()
-    if (quizFile && dailyReadId.value) {
+    if (quizFile) {
       const formData = new FormData()
       formData.append('file', quizFile)
 
@@ -52,6 +71,13 @@ async function onSubmit(param: {
         body: formData
       })
 
+      quizForm.value?.refresh()
+      quizForm.value?.clearQuizFile()
+    }
+
+    // Then, submit bulk paste if exists
+    if (quizForm.value?.hasBulkPaste()) {
+      await quizForm.value?.submitBulkPaste(dailyReadId.value)
       quizForm.value?.refresh()
     }
 
@@ -72,11 +98,11 @@ async function onSubmit(param: {
 <template>
   <UDashboardPanel>
     <template #header>
-      <DashboardNavbar title="Create Daily Read" />
+      <DashboardNavbar />
     </template>
 
     <template #body>
-      <div class="max-w-7xl mx-auto">
+      <div>
         <div class="flex items-center gap-2 mb-6">
           <UButton
             icon="i-lucide-arrow-left"
@@ -89,24 +115,26 @@ async function onSubmit(param: {
           </h1>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-6 pr-6">
-          <div>
+        <UTabs
+          :items="tabs"
+          :unmount-on-hide="false"
+        >
+          <template #details>
             <DailyReadForm
               ref="form"
               :loading="formLoading"
               @submit="onSubmit"
             />
-          </div>
+          </template>
 
-          <div class="lg:sticky lg:top-6 lg:self-start">
-            <UCard>
-              <DailyReadQuizForm
-                ref="quizForm"
-                :daily-read-id="dailyReadId"
-              />
-            </UCard>
-          </div>
-        </div>
+          <template #quiz>
+            <DailyReadQuizForm
+              ref="quizForm"
+              :daily-read-id="dailyReadId"
+              no-submit
+            />
+          </template>
+        </UTabs>
       </div>
     </template>
   </UDashboardPanel>

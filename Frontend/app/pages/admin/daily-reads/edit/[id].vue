@@ -172,7 +172,10 @@ async function onSubmit(param: {
           </h1>
         </div>
 
-        <UTabs :items="tabs">
+        <UTabs
+          :items="tabs"
+          :unmount-on-hide="false"
+        >
           <template #details>
             <DailyReadForm
               ref="form"
