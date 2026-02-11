@@ -22,6 +22,8 @@ const form = useTemplateRef<typeof ReadingReportForm>('form')
 const formLoading = ref(false)
 const toast = useToast()
 
+const sound = useSound()
+const streak = useStreak()
 async function onSubmit(data: { readingResourceId: number, currentPage: number, insight: string }) {
   try {
     formLoading.value = true
@@ -35,10 +37,28 @@ async function onSubmit(data: { readingResourceId: number, currentPage: number, 
       return
     }
 
-    toast.add({
-      title: 'Reading report created successfully',
-      color: 'success'
-    })
+    if (!streak.todayStreaked && (streak.streakCount + 1) % 7 === 0) {
+      toast.add({
+        title: `Congratulations! You've reached a ${streak.streakCount + 1} day reading streak!`,
+        description: 'Keep up the great work and continue your reading journey!',
+        color: 'success'
+      })
+      streak.setStreak(streak.streakCount + 1, true)
+      sound.playStreakSound()
+    } else if (data.currentPage >= (readingResource.value?.page || 0)) {
+      toast.add({
+        title: 'Congratulations on completing your reading!',
+        description: 'Fantastic job on finishing your reading. Keep up the great work!',
+        color: 'success'
+      })
+      sound.playBookCompleteSound()
+    } else {
+      toast.add({
+        title: 'Reading report created successfully',
+        color: 'success'
+      })
+      sound.playReportSound()
+    }
 
     // Clear the persisted state on successful submission
     form.value?.clearPersistedState()

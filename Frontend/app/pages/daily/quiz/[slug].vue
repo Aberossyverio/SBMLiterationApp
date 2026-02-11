@@ -183,6 +183,7 @@ async function nextQuestion() {
   }
 }
 
+const sound = useSound()
 async function submitQuiz() {
   try {
     submitting.value = true
@@ -217,6 +218,7 @@ async function submitQuiz() {
           description: `You passed the quiz! Score: ${response.data.correctAnswers}/${response.data.totalQuestions}`,
           color: 'success'
         })
+        sound.playBookCompleteSound()
       } else {
         toast.add({
           title: 'Quiz Completed',

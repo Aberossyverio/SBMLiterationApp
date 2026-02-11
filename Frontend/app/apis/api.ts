@@ -194,7 +194,7 @@ export function handleResponseError(error: any) {
       || 'An unknown error occurred'
 
   toast.add({
-    title: 'Error',
+    title: 'Oops!',
     description,
     color: 'error',
     icon: 'i-lucide-triangle-alert'

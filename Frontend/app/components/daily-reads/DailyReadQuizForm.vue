@@ -23,6 +23,7 @@ interface EditFormState {
 
 const props = defineProps<{
   dailyReadId: number | null
+  noSubmit?: boolean
 }>()
 
 const quiz = ref<QuizQuestion[]>([])
@@ -328,6 +329,103 @@ async function parseBulkPaste() {
   showBulkPaste.value = false
 }
 
+function getBulkPasteText() {
+  return bulkPasteText.value
+}
+
+function hasBulkPaste() {
+  return bulkPasteText.value.trim().length > 0
+}
+
+async function submitBulkPaste(dailyReadId: number) {
+  if (!bulkPasteText.value.trim()) {
+    return
+  }
+
+  const lines = bulkPasteText.value.trim().split('\n')
+  const parsedQuestions: QuizQuestion[] = []
+
+  for (const line of lines) {
+    if (!line.trim()) continue
+
+    const parts = line.split('\t')
+    if (parts.length < 4) {
+      toast.add({
+        title: 'Invalid format',
+        description: 'Each line should have at least: questionSeq, question, correctAnswer, and one answer',
+        color: 'error'
+      })
+      return
+    }
+
+    const questionSeq = parseInt(parts[0] ?? '1')
+    const question = parts[1]
+    const correctAnswer = parts[2]
+    const answers = parts.slice(3)
+
+    if (isNaN(questionSeq)) {
+      toast.add({
+        title: 'Invalid question sequence',
+        description: `"${parts[0]}" is not a valid number`,
+        color: 'error'
+      })
+      return
+    }
+
+    const choices: QuizChoice[] = answers.map((answer, idx) => ({
+      choice: String.fromCharCode(65 + idx),
+      answer: answer.trim()
+    }))
+
+    parsedQuestions.push({
+      questionSeq,
+      question: question || '',
+      correctAnswer: correctAnswer || 'A',
+      choices
+    })
+  }
+
+  // save each questions through POST
+  const promises: Promise<ApiResponse>[] = []
+  for (const pq of parsedQuestions) {
+    promises.push(
+      $authedFetch<ApiResponse>(
+        `/daily-reads/${dailyReadId}/quiz/`,
+        {
+          method: 'POST',
+          body: {
+            questionSeq: pq.questionSeq,
+            question: pq.question,
+            correctAnswer: pq.correctAnswer,
+            choices: pq.choices
+          }
+        }
+      )
+    )
+  }
+
+  await Promise.all(promises).then((responses) => {
+    const errors = responses.filter(e => e.errorCode)
+    if (errors.length > 0) {
+      for (const err of errors) {
+        handleResponseError(err)
+      }
+    }
+    toast.add({
+      title: `${responses.length - errors.length} questions saved`,
+      color: 'success'
+    })
+  })
+
+  bulkPasteText.value = ''
+  showBulkPaste.value = false
+}
+
+function clearBulkPaste() {
+  bulkPasteText.value = ''
+  showBulkPaste.value = false
+}
+
 const dialog = useDialog()
 async function deleteQuestion(questionSeq: number) {
   if (!props.dailyReadId) return
@@ -359,7 +457,11 @@ watch(() => props.dailyReadId, () => {
 defineExpose({
   refresh: fetchQuiz,
   getQuizFile,
-  clearQuizFile
+  clearQuizFile,
+  getBulkPasteText,
+  hasBulkPaste,
+  submitBulkPaste,
+  clearBulkPaste
 })
 </script>
 
@@ -380,7 +482,6 @@ defineExpose({
             <div v-if="dailyReadId">
               <UButton
                 icon="i-heroicons-plus"
-                size="sm"
                 color="primary"
                 block
                 @click="addNewQuestion"
@@ -393,7 +494,6 @@ defineExpose({
             <div>
               <UButton
                 icon="i-heroicons-document-duplicate"
-                size="sm"
                 color="neutral"
                 variant="outline"
                 block
@@ -407,7 +507,6 @@ defineExpose({
             <div>
               <UButton
                 icon="i-heroicons-arrow-down-tray"
-                size="sm"
                 color="neutral"
                 variant="outline"
                 block
@@ -423,7 +522,6 @@ defineExpose({
               <UInput
                 type="file"
                 accept=".xlsx,.xls"
-                size="sm"
                 @change="(e) => handleQuizFileUpload(Array.from((e.target as HTMLInputElement).files || []))"
               />
               <div
@@ -452,7 +550,6 @@ defineExpose({
               </h4>
               <UButton
                 icon="i-heroicons-x-mark"
-                size="xs"
                 color="neutral"
                 variant="ghost"
                 @click="showBulkPaste = false"
@@ -472,7 +569,6 @@ defineExpose({
             />
             <div class="flex gap-2">
               <UButton
-                size="xs"
                 color="neutral"
                 variant="outline"
                 block
@@ -481,7 +577,7 @@ defineExpose({
                 Cancel
               </UButton>
               <UButton
-                size="xs"
+                v-if="!noSubmit"
                 block
                 @click="parseBulkPaste"
               >
@@ -594,7 +690,6 @@ defineExpose({
                 />
                 <UButton
                   icon="i-heroicons-trash"
-                  size="xs"
                   color="error"
                   variant="ghost"
                   :disabled="editForm.choices.length === 1"
@@ -604,7 +699,6 @@ defineExpose({
 
               <UButton
                 icon="i-heroicons-plus"
-                size="xs"
                 color="neutral"
                 variant="outline"
                 @click="addChoice"
@@ -615,7 +709,6 @@ defineExpose({
 
             <div class="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
               <UButton
-                size="xs"
                 color="neutral"
                 variant="outline"
                 :disabled="saving"
@@ -624,7 +717,6 @@ defineExpose({
                 Cancel
               </UButton>
               <UButton
-                size="xs"
                 :loading="saving"
                 @click="saveQuestion"
               >
@@ -666,7 +758,6 @@ defineExpose({
               <div class="flex items-center gap-1 flex-shrink-0">
                 <UButton
                   icon="i-heroicons-pencil"
-                  size="xs"
                   color="neutral"
                   variant="ghost"
                   @click="startEdit(question)"
@@ -674,7 +765,6 @@ defineExpose({
                 <UButton
                   v-if="question.id"
                   icon="i-heroicons-trash"
-                  size="xs"
                   color="error"
                   variant="ghost"
                   @click="deleteQuestion(question.questionSeq)"
