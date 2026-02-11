@@ -9,13 +9,11 @@ import { useAuth } from '~/apis/api'
 definePageMeta({
   layout: 'landing',
   name: 'LandingPage',
-  middleware: (to, from) => {
+  middleware: () => {
     // Only redirect on direct access (not from internal navigation)
-    if (!from.path) {
-      const auth = useAuth()
-      if (auth.getToken()) {
-        return navigateTo('/dashboard')
-      }
+    const auth = useAuth()
+    if (auth.getToken()) {
+      return navigateTo('/dashboard')
     }
   }
 })
