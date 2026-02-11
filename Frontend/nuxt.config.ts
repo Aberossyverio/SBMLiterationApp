@@ -81,6 +81,7 @@ export default defineNuxtConfig({
   pwa: {
     manifest: {
       short_name: 'SIGMA',
+      name: 'SIGMA',
       lang: 'en',
       display: 'standalone',
       orientation: 'portrait',
@@ -110,13 +111,11 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      importScripts: ['/sw-custom.js'],
-      navigateFallbackDenylist: [/^\/auth/, /^\/api/, /\?code=/, /\?state=/]
+      importScripts: ['/sw-custom.js']
     },
     client: {
       installPrompt: true,
-      periodicSyncForUpdates: 3600 // Check for updates every hour
+      periodicSyncForUpdates: 15 * 60 * 1000 // Check for every 15 minutes
     }
     // devOptions: {
     //   enabled: true,
