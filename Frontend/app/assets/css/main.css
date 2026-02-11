@@ -1,10 +1,10 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 @theme static {
-  --font-sans: "Public Sans", sans-serif;
+  --font-sans: 'Public Sans', sans-serif;
   --color-base: #0b4c53;
-  --font-poppins: "Poppins", sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
 
   --color-green-50: #effdf5;
   --color-green-100: #d9fbe8;
@@ -22,7 +22,7 @@
   --color-dark: #252432;
   --color-fire: #fe483b;
   --color-jose: #737373;
-  --font-poppins: "Poppins", sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
 }
 
 :root {
@@ -33,8 +33,7 @@
   --ui-secondary: hsl(217, 91%, 60%);
   --ui-bg-muted: hsl(48, 50%, 94%);
   --ui-bg-elevated: hsl(48, 50%, 92%);
-  --ui-bg-accented: hsl(48, 50%, 70%);
-
+  --ui-bg-accented: hsl(49, 51%, 85%);
   --ui-text-dimmed: hsl(50, 4%, 38%);
   --ui-text-muted: hsl(50, 4%, 30%);
   --ui-text-toned: hsl(50, 6%, 26%);

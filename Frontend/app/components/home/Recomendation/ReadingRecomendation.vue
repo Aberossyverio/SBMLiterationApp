@@ -128,7 +128,7 @@ async function addToReadList(book: { id: number }) {
         <div>
           <UButton
             v-if="!googleBooks"
-            class="w-full font-semibold rounded-full text-center bg-primary text-[13px] justify-center"
+            class="w-full font-semibold rounded-full text-center bg-primary text-[13px] justify-center cursor-pointer"
             :loading="loading"
             @click="addToReadList(book)"
           >

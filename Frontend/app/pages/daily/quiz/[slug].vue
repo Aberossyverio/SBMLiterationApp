@@ -308,9 +308,9 @@ function backToDashboard() {
           <span>Question {{ currentQuestionIndex + 1 }} of {{ quiz.length }}</span>
           <span>{{ Math.round(progress) }}%</span>
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="w-full bg-accented rounded-full h-2">
           <div
-            class="bg-primary-600 h-2 rounded-full transition-all duration-300"
+            class="bg-primary h-2 rounded-full transition-all duration-300"
             :style="{ width: `${progress}%` }"
           />
         </div>
@@ -327,7 +327,7 @@ function backToDashboard() {
         <div class="space-y-6">
           <div>
             <div class="flex items-start gap-3 mb-4">
-              <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center font-bold text-primary-600">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary  flex items-center justify-center font-bold ">
                 {{ currentQuestionIndex + 1 }}
               </div>
               <h2 class="text-2xl font-semibold pt-1">

@@ -143,6 +143,7 @@ function startQuiz() {
           size="xl"
           icon="i-lucide-brain"
           @click="startQuiz"
+          class="cursor-pointer"
         >
           Take the Quiz
         </UButton>
