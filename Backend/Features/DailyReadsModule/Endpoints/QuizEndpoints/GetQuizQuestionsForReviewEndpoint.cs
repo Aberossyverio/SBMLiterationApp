@@ -35,7 +35,6 @@ public class GetQuizQuestionsForReviewEndpoint(ApplicationDbContext dbContext)
         var dailyReadId = Route<int>("dailyReadId");
 
         var questions = await dbContext.QuizQuestions
-            .Include(q => q.Choices)
             .Where(q => q.DailyReadId == dailyReadId)
             .OrderBy(q => q.QuestionSeq)
             .Select(q => new QuizQuestionForReviewResponse(
@@ -43,7 +42,7 @@ public class GetQuizQuestionsForReviewEndpoint(ApplicationDbContext dbContext)
                 q.QuestionSeq,
                 q.Question,
                 q.CorrectAnswer,
-                q.Choices.Select(c => new QuizChoiceResponse(c.Id, c.Choice, c.Answer)).ToList()
+                q.Choices.OrderBy(c => c.Choice).Select(c => new QuizChoiceResponse(c.Id, c.Choice, c.Answer)).ToList()
             ))
             .ToListAsync(ct);
 

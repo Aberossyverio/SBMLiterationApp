@@ -50,59 +50,42 @@ async function handleSubmit(
     <UContainer class="flex flex-col gap-y-4">
       <!-- TODO: Style below card to follow figma design -->
       <UCard
-        class="overflow-visible mb-[100px]"
+        class="overflow-visible"
         :ui="{
           header: ' border-0',
           root: 'bg-primary mx-[-16px] sm:mx-[-24px] lg:mx-[-32px] rounded-t-none rounded-b-3xl px-4 py-4'
         }"
       >
-      <template #header>
-  <div class="flex items-start justify-between gap-2 relative"> <div class="text-white z-50 relative"> 
-      <div 
-        class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full transition-all duration-200 cursor-pointer hover:bg-white/20 active:bg-white/30 active:scale-90 group"
-        @click="useRouter().back()"
-      >
-        <UIcon
-          name="i-heroicons-chevron-left"
-          class="size-7 transition-transform group-hover:-translate-x-0.5"
-        />
-      </div>
-    </div>
-
-    <UPageHeader
-      title="Add Book"
-      :ui="{
-        root: 'py-0 border-0 pb-10',
-        wrapper: 'lg:justify-center',
-        title: 'text-white text-center line-clamp-1 text-[22px] lg:text-[24px] leading-tight font-medium'
-      }"
-      class="flex-1 border-0"
-    />
-
-    <div class="text-transparent pointer-events-none">
-      <UIcon name="i-heroicons-chevron-left" class="size-6" />
-    </div>
-  </div>
-</template>
-
-        <template #footer>
-          <div
-            class="flex flex-row justify-center relative overflow-visible border-0 ring-0 text-white mb-12 md:mb-29"
-          >
-            <div
-              class="h-48 md:h-60 aspect-2/3 rounded-2xl absolute -top-12 flex justify-center items-center text-[#3566CD] bg-[#F5F5F7]"
-            >
-              <UIcon
-                name="i-heroicons-book-open"
-                class="size-14"
-              />
+        <template #header>
+          <div class="flex items-start justify-between gap-2 relative">
+            <div class="text-white z-50 relative">
+              <div
+                class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full transition-all duration-200 cursor-pointer hover:bg-white/20 active:bg-white/30 active:scale-90 group"
+                @click="useRouter().back()"
+              >
+                <UIcon
+                  name="i-heroicons-chevron-left"
+                  class="size-7 transition-transform group-hover:-translate-x-0.5"
+                />
+              </div>
             </div>
 
-            <h6
-              class="absolute bottom-[-175px] md:bottom-[-225px] left-1/2 -translate-x-1/2 text-[#737373] dark:text-white text-[14px]"
-            >
-              Cover
-            </h6>
+            <UPageHeader
+              title="Add Book"
+              :ui="{
+                root: 'py-0 border-0 pb-10',
+                wrapper: 'lg:justify-center',
+                title: 'text-white text-center line-clamp-1 text-[22px] lg:text-[24px] leading-tight font-medium'
+              }"
+              class="flex-1 border-0"
+            />
+
+            <div class="text-transparent pointer-events-none">
+              <UIcon
+                name="i-heroicons-chevron-left"
+                class="size-6"
+              />
+            </div>
           </div>
         </template>
       </UCard>

@@ -51,7 +51,6 @@
   </section>
 </template>
 
-
 <script setup lang="ts">
 const datas = [
   {
@@ -70,5 +69,4 @@ const datas = [
     desc: 'Earn points, track progress, hit milestones! Celebrate a victory with every page that you read.'
   }
 ]
-
 </script>

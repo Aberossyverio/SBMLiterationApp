@@ -59,15 +59,19 @@
                     <p>{{ item.answer.intro }}</p>
 
                     <ul class="list-disc pl-6 space-y-1">
-                      <li v-for="(bullet, i) in item.answer.bullets" :key="i">
+                      <li
+                        v-for="(bullet, i) in item.answer.bullets"
+                        :key="i"
+                      >
                         {{ bullet }}
                       </li>
                     </ul>
 
-                    <p class="pt-2">{{ item.answer.outro }}</p>
+                    <p class="pt-2">
+                      {{ item.answer.outro }}
+                    </p>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -129,7 +133,7 @@ const faqs = [
         'Relevance to daily life, leadership, or decision-making'
       ],
       outro:
-        'Formal summaries or academic writing are not required'
+        'Formal summaries or academic writing are not required.'
     }
   },
   {

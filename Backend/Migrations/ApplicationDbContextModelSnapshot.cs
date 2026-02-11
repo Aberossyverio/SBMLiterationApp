@@ -438,7 +438,7 @@ namespace PureTCOWebApp.Migrations
                     b.HasKey("Id")
                         .HasName("pk_mt_quiz_answer");
 
-                    b.HasIndex("UserId", "DailyReadId", "QuestionSeq")
+                    b.HasIndex("UserId", "DailyReadId", "QuestionSeq", "RetrySeq")
                         .HasDatabaseName("ix_mt_quiz_answer_user_daily_question");
 
                     b.ToTable("mt_quiz_answer", (string)null);

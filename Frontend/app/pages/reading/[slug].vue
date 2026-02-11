@@ -22,6 +22,8 @@ const form = useTemplateRef<typeof ReadingReportForm>('form')
 const formLoading = ref(false)
 const toast = useToast()
 
+const sound = useSound()
+const streak = useStreak()
 async function onSubmit(data: { readingResourceId: number, currentPage: number, insight: string }) {
   try {
     formLoading.value = true
@@ -35,11 +37,31 @@ async function onSubmit(data: { readingResourceId: number, currentPage: number, 
       return
     }
 
-    toast.add({
-      title: 'Reading report created successfully',
-      color: 'success'
-    })
+    if (!streak.todayStreaked && (streak.streakCount + 1) % 7 === 0) {
+      toast.add({
+        title: `Congratulations! You've reached a ${streak.streakCount + 1} day reading streak!`,
+        description: 'Keep up the great work and continue your reading journey!',
+        color: 'success'
+      })
+      streak.setStreak(streak.streakCount + 1, true)
+      sound.playStreakSound()
+    } else if (data.currentPage >= (readingResource.value?.page || 0)) {
+      toast.add({
+        title: 'Congratulations on completing your reading!',
+        description: 'Fantastic job on finishing your reading. Keep up the great work!',
+        color: 'success'
+      })
+      sound.playBookCompleteSound()
+    } else {
+      toast.add({
+        title: 'Reading report created successfully',
+        color: 'success'
+      })
+      sound.playReportSound()
+    }
 
+    // Clear the persisted state on successful submission
+    form.value?.clearPersistedState()
     form.value?.close()
 
     // Refresh the reports list
@@ -72,6 +94,8 @@ const latestPageProgress = computed(() => {
   return Math.max(...readingReports.value.map(r => r.currentPage))
 })
 
+const router = useRouter()
+const persistedReport = usePersistedReadingReport()
 onMounted(async () => {
   // fetch reading resource detail
   try {
@@ -81,9 +105,13 @@ onMounted(async () => {
       readingResource.value = response.data
     else {
       handleResponseError(response)
+      persistedReport.clearReportState(route.params.slug as string)
+      router.back()
     }
   } catch (err) {
     handleResponseError(err)
+    persistedReport.clearReportState(route.params.slug as string)
+    router.back()
   } finally {
     pending.value = false
   }
@@ -168,7 +196,6 @@ onMounted(async () => {
             >
               <img
                 :src="readingResource?.coverImageUri"
-                :alt="`${readingResource?.title} Cover`"
                 class="h-48 md:h-60 aspect-2/3 rounded-2xl absolute -top-12"
               >
               <div />
@@ -287,6 +314,8 @@ onMounted(async () => {
           ref="form"
           :loading="formLoading"
           :reading-resource-id="readingResource?.id || 0"
+          :resource-slug="String(route.params.slug)"
+          :resource-title="readingResource?.title || ''"
           :latest-page-progress="latestPageProgress"
           :max-page="readingResource?.page || 0"
           @submit="onSubmit"

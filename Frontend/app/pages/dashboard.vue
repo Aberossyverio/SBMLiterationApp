@@ -31,12 +31,21 @@ watch(error, (err) => {
 })
 
 function fetchReadingResources() {
+  if (!readingResource.value?.fetch) return
   readingResource.value?.fetch()
 }
 
 function fetchRecommendation() {
   recommendation.value?.fetch()
 }
+
+onMounted(() => {
+  const quizComposable = usePersistedQuiz()
+  const reportState = usePersistedReadingReport()
+
+  quizComposable.init()
+  reportState.init()
+})
 
 const tabs = ref<TabsItem[]>([
   {
@@ -77,7 +86,7 @@ const tab = ref(0)
               <h1 class="text-[36px] font-extrabold tracking-tighter">
                 Welcome,
 
-                {{ auth.getFullname() }}
+                {{ auth.getFullname() }} 😁
               </h1>
             </div>
           </template>
