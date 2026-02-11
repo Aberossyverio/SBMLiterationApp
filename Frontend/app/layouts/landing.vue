@@ -90,7 +90,7 @@ function goToDashboard() {
     </UMain>
 
     <USeparator>
-      <img src="/5.png" class="h-auto w-36" alt="Logo" />
+      <img src="/3-short.png" class="h-auto w-6" alt="Logo" />
     </USeparator>
 
     <UFooter>
