@@ -76,7 +76,7 @@ function close() {
 
 const items = ref([
   { label: 'International', value: 'International' },
-  { label: 'Reguler', value: 'Reguler' },
+  { label: 'Reguler', value: 'Reguler' }
 ])
 
 defineExpose({
