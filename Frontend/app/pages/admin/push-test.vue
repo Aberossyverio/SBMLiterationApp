@@ -22,7 +22,7 @@ const logs = ref<LogEntry[]>([])
 // Broadcast state
 const subscriberCount = ref<number | null>(null)
 const isBroadcasting = ref(false)
-const broadcastResult = ref<{ sent: number; failed: number; message: string } | null>(null)
+const broadcastResult = ref<{ sent: number, failed: number, message: string } | null>(null)
 
 onMounted(async () => {
   if ('Notification' in window) {
@@ -171,7 +171,7 @@ async function runBroadcast() {
   isBroadcasting.value = true
   broadcastResult.value = null
   try {
-    const res = await $authedFetch<{ data?: { sent: number; failed: number; message: string } }>(
+    const res = await $authedFetch<{ data?: { sent: number, failed: number, message: string } }>(
       '/test-items/push-notification/broadcast',
       {
         method: 'POST',

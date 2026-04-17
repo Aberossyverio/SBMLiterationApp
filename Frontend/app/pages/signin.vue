@@ -1,16 +1,16 @@
 <template>
-  <div
-    class="flex flex-col items-center justify-center gap-4 p-4 h-full"
-  >
-    <UPageCard class="w-full max-w-md">
-      <UAuthForm
-        title="Login"
-        description="Enter your credentials to access your account."
-        icon="i-lucide-user"
-        :providers="providers"
-        :loading="loading"
-      />
-    </UPageCard>
+  <div>
+    <div class="flex flex-col items-center justify-center gap-4 p-4 h-full">
+      <UPageCard class="w-full max-w-md">
+        <UAuthForm
+          title="Login"
+          description="Enter your credentials to access your account."
+          icon="i-lucide-user"
+          :providers="providers"
+          :loading="loading"
+        />
+      </UPageCard>
+    </div>
   </div>
 </template>
 
@@ -37,9 +37,40 @@ definePageMeta({
 })
 
 const loading = ref(false)
-
+const router = useRouter()
+const toast = useToast()
 const $api = useNuxtApp().$backendApi
+const { loginWithPasskey, isPasskeySupported } = usePasskey()
+
 const providers = ref([
+  {
+    loading: loading,
+    label: 'Passkey',
+    icon: 'i-lucide-fingerprint',
+    onClick: async () => {
+      try {
+        loading.value = true
+        await loginWithPasskey()
+        toast.add({
+          title: 'Success',
+          description: 'Signed in successfully!',
+          color: 'success',
+          icon: 'i-lucide-check-circle'
+        })
+        router.push('/onboarding')
+      } catch (error: unknown) {
+        const errorMessage = error && typeof error === 'object' && 'message' in error ? String(error.message) : 'Failed to sign in with passkey.'
+        toast.add({
+          title: 'Error',
+          description: errorMessage,
+          color: 'error',
+          icon: 'i-lucide-circle-off'
+        })
+      } finally {
+        loading.value = false
+      }
+    }
+  },
   {
     loading: loading,
     label: 'Google',
@@ -52,7 +83,7 @@ const providers = ref([
         if (result.authUrl)
           window.location.href = result.authUrl
       } catch {
-        useToast().add({
+        toast.add({
           title: 'Error',
           description: 'Failed to initiate Google sign-in.',
           color: 'error',
@@ -64,4 +95,11 @@ const providers = ref([
     }
   }
 ])
+
+// Remove passkey option if not supported
+onMounted(() => {
+  if (!isPasskeySupported()) {
+    providers.value = providers.value.filter(p => p.label !== 'Passkey')
+  }
+})
 </script>

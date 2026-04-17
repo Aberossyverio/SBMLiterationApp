@@ -49,6 +49,10 @@ const items: NavigationMenuItem[] = [{
   label: 'Push Test',
   icon: 'i-lucide-bell-ring',
   to: '/admin/push-test'
+}, {
+  label: 'Passkeys',
+  icon: 'i-lucide-fingerprint',
+  to: '/admin/register-passkey'
 }]
 </script>
 

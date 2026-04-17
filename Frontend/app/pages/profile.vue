@@ -6,6 +6,7 @@ import GroupInfo from '~/components/profile/GroupInfo.vue'
 import type { ProfileFormSchema } from '~/components/profile/ProfileForm.vue'
 import type { PersistedQuizState } from '~/composables/quiz'
 import type { PersistedReadingReportState } from '~/composables/reading-report'
+import { useColorMode } from '#imports'
 
 definePageMeta({
   middleware: ['auth', 'participant-only']
@@ -30,6 +31,7 @@ const quizComposable = usePersistedQuiz()
 const unfinishedQuizzes = ref<PersistedQuizState[]>([])
 const reportComposable = usePersistedReadingReport()
 const unfinishedReports = ref<PersistedReadingReportState[]>([])
+const auth = useAuth()
 
 async function fetchProfile() {
   try {
@@ -154,9 +156,9 @@ onMounted(() => {
 })
 
 const dialog = useDialog()
-const auth = useAuth()
 const router = useRouter()
 const color = useColorMode()
+const starry = useStarryNight()
 
 const links = ref<ButtonProps[]>([
   {
@@ -180,16 +182,14 @@ function toggleColorMode() {
   color.preference = color.value === 'dark' ? 'light' : 'dark'
 }
 
-const starry = useStarryNight()
 function toggleStarryMode() {
-  // This function can be used to toggle starry mode if needed
   starry.enabled = !starry.enabled
 }
 </script>
 
 <template>
   <div
-    class="max-w-[1200px] mx-auto flex flex-col items-center justify-center gap-4 p-4 h-full"
+    class="max-w-300 mx-auto flex flex-col items-center justify-center gap-4 p-4 h-full"
   >
     <UContainer>
       <div class="flex flex-col space-y-6">
