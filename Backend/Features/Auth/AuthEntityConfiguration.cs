@@ -43,6 +43,31 @@ public class RefreshTokenEntityConfiguration : IEntityTypeConfiguration<RefreshT
     }
 }
 
+public class PasskeyCredentialEntityConfiguration : IEntityTypeConfiguration<PasskeyCredential>
+{
+    public void Configure(EntityTypeBuilder<PasskeyCredential> builder)
+    {
+        builder.HasKey(pc => pc.Id);
+
+        builder.Property(pc => pc.CredentialId)
+            .IsRequired();
+
+        builder.Property(pc => pc.PublicKey)
+            .IsRequired();
+
+        builder.Property(pc => pc.DeviceName)
+            .HasMaxLength(200);
+
+        builder.HasIndex(pc => pc.CredentialId)
+            .IsUnique();
+
+        builder.HasOne(pc => pc.User)
+            .WithMany()
+            .HasForeignKey(pc => pc.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public class RoleSeeder : IEntityTypeConfiguration<IdentityRole<int>>
 {
     public void Configure(EntityTypeBuilder<IdentityRole<int>> builder)

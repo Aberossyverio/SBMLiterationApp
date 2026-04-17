@@ -30,6 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<PasskeyCredential> PasskeyCredentials { get; set; }
     public DbSet<TestItem> TestItems { get; set; }
     public DbSet<Book> Books { get; set; }
     public DbSet<JournalPaper> JournalPapers { get; set; }

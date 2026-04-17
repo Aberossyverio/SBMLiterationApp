@@ -54,6 +54,9 @@ builder.Services.AddHostedService<OutboxProcessorHostedService>();
 // Add JWT Token Service
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
+// Add Passkey Service
+builder.Services.AddScoped<IPasskeyService, PasskeyService>();
+
 // Configure MinIO
 builder.Services.Configure<MinIOSettings>(builder.Configuration.GetSection("MinIO"));
 var minioSettings = builder.Configuration.GetSection("MinIO").Get<MinIOSettings>();
